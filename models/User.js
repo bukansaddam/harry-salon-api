@@ -1,5 +1,6 @@
 const { nanoid } = require("nanoid");
 const { Model } = require("sequelize");
+const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
@@ -58,6 +59,8 @@ module.exports = (sequelize, DataTypes) => {
       tableName: "users"
     }
   );
+
+  paginate(User);
 
   return User;
 };

@@ -6,6 +6,7 @@ const {
 } = require("../middlewares/auth");
 const bcrypt = require("bcrypt");
 const { validateUser } = require("../validators/validator");
+const { Op } = require("sequelize");
 
 async function signUp(req, res) {
   const { name, email, password, phone, address } = req.body;
@@ -119,13 +120,47 @@ async function signOut(req, res) {
 
 async function getUser(req, res) {
   try {
-    const users = await user.findAll();
+    const searchTerm = req.query.q;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    let order = [["name", "ASC"]];
+
+    const whereClause = {};
+    if (searchTerm) {
+      whereClause.name = { [Op.like]: `%${searchTerm}%` };
+
+      order = [];
+    }
+
+    const result = await user.paginate({
+      page: page,
+      paginate: pageSize,
+      where: whereClause,
+      order: order,
+    });
+
+    const response = {
+      total_count: result.total,
+      total_pages: result.pages,
+      data: result.docs,
+    };
+
+    if (result.docs.length === 0) {
+      return res.status(404).json({
+        message: "User not found",
+        result: response,
+      });
+    }
+
     return res.status(200).json({
       success: true,
-      message: "Users retrieved successfully",
-      data: users,
+      message: "User retrieved successfully",
+      result: response,
     });
+
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

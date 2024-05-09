@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const userController = require("../controllers/user.controller");
 const ownerController = require("../controllers/owner.controller");
+const employeeController = require("../controllers/employee.controller");
 const {
   isOwner,
   authenticateToken,
@@ -28,6 +29,15 @@ router.post(
   authenticateRefreshToken,
   checkBlacklist,
   ownerController.signOut
+);
+
+router.post("/employees/signin", employeeController.signIn);
+router.post(
+  "/employees/signout",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  employeeController.signOut
 );
 
 module.exports = router;

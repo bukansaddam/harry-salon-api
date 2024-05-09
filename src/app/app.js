@@ -7,6 +7,7 @@ var indexRouter = require("../routes/index");
 var usersRouter = require("../routes/users");
 var authRouter = require("../routes/auth");
 var ownerRouter = require("../routes/owners");
+var employeeRouter = require("../routes/employees");
 
 var app = express();
 
@@ -21,5 +22,6 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use("/auth", authRouter);
 app.use("/owners", ownerRouter);
+app.use("/employees", employeeRouter);
 
 module.exports = app;

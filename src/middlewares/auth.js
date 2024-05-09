@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { user } = require("../../models");
 const { owner } = require("../../models");
+const { employee } = require("../../models");
 dotenv = require("dotenv");
 dotenv.config();
 
@@ -96,6 +97,7 @@ async function isOwner(req, res, next) {
 
   if (!token) {
     return res.status(401).json({
+      success: false,
       error: "Unauthorized: Access token not provided",
     });
   }
@@ -110,12 +112,48 @@ async function isOwner(req, res, next) {
       next();
     } else {
       res.status(403).json({
+        success: false,
         error: "Forbidden: You do not have permission to access this resource",
       });
     }
   } catch (error) {
     console.error("Error in isOwner middleware:", error);
     res.status(403).json({
+      success: false,
+      error: "Forbidden: Invalid access token",
+    });
+  }
+}
+
+async function isEmployee(req, res, next) {
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized: Access token not provided",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
+
+    const existingEmployee = await employee.findOne({ where: { id: userId } });
+
+    if (existingEmployee) {
+      next();
+    } else {
+      res.status(403).json({
+        success: false,
+        error: "Forbidden: You do not have permission to access this resource",
+      });
+    }
+  } catch (error) {
+    console.error("Error in isEmployee middleware:", error);
+    res.status(403).json({
+      success: false,
       error: "Forbidden: Invalid access token",
     });
   }
@@ -130,4 +168,5 @@ module.exports = {
   authData,
   clearToken,
   isOwner,
+  isEmployee,
 };

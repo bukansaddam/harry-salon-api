@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const employeeController = require("../controllers/employee.controller");
+const hairstyleController = require("../controllers/hairstyle.controller");
 const { upload } = require("../middlewares/multer");
 const {
   authenticateToken,
@@ -9,37 +9,45 @@ const {
   isOwner,
 } = require("../middlewares/auth");
 
-router.post("/", employeeController.createEmployee);
-
-router.get(
+router.post(
   "/",
   isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  employeeController.getEmployee
+  upload.single("image"),
+  hairstyleController.createHairstyle
+);
+router.get(
+  "/",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  hairstyleController.getHairstyle
 );
 router.get(
   "/:id",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  employeeController.getDetailEmployee
+  hairstyleController.getDetailHairstyle
 );
 router.put(
   "/:id",
+  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  upload.single("avatar"),
-  employeeController.updateEmployee
+  upload.single("image"),
+  hairstyleController.updateHairstyle
 );
 router.delete(
   "/:id",
+  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  employeeController.deleteEmployee
+  hairstyleController.deleteHairstyle
 );
 
 module.exports = router;

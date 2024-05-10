@@ -1,12 +1,5 @@
 const { hairstyle } = require("../../models/");
 const { Op } = require("sequelize");
-const { validateUser } = require("../validators/validator");
-const bcrypt = require("bcrypt");
-const {
-  generateAccessToken,
-  authData,
-  clearToken,
-} = require("../middlewares/auth");
 
 async function createHairstyle(req, res) {
   const { name, description } = req.body;

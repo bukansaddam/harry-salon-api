@@ -9,6 +9,7 @@ var authRouter = require("../routes/auth");
 var ownerRouter = require("../routes/owners");
 var employeeRouter = require("../routes/employees");
 var hairstyleRouter = require("../routes/hairstyles");
+var storeRouter = require("../routes/stores");
 
 var app = express();
 
@@ -25,5 +26,6 @@ app.use("/auth", authRouter);
 app.use("/owners", ownerRouter);
 app.use("/employees", employeeRouter);
 app.use("/hairstyles", hairstyleRouter);
+app.use("/stores", storeRouter);
 
 module.exports = app;

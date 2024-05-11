@@ -3,46 +3,22 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("stores", {
+    await queryInterface.createTable("store_images", {
       id: {
         type: Sequelize.STRING(10),
         primaryKey: true,
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      name: {
-        type: Sequelize.STRING(100),
+      image: {
+        type: Sequelize.STRING(),
         allowNull: false,
       },
-      description: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      longitude: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-      },
-      latitude: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-      },
-      open: {
-        type: Sequelize.TIME,
-        allowNull: false,
-      },
-      close: {
-        type: Sequelize.TIME,
-        allowNull: false,
-      },
-      status: {
-        type: Sequelize.STRING(10),
-        allowNull: true,
-      },
-      ownerId: {
+      storeId: {
         type: Sequelize.STRING(10),
         allowNull: true,
         references: {
-          model: "owners",
+          model: "stores",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -62,6 +38,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("stores");
+    await queryInterface.dropTable("store_images");
   },
 };

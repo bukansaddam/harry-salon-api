@@ -3,15 +3,15 @@ const { Model } = require("sequelize");
 const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
-  class Image extends Model {
+  class Commodity extends Model {
     static associate(models) {
-      Image.belongsTo(models.store, {
+      Commodity.belongsTo(models.store, {
         foreignKey: "storeId",
       });
     }
   }
 
-  Image.init(
+  Commodity.init(
     {
       id: {
         type: DataTypes.STRING(10),
@@ -23,9 +23,17 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(),
         allowNull: false,
       },
+      name: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+      },
+      stock: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       storeId: {
         type: DataTypes.STRING(10),
-        allowNull: false,
+        allowNull: true,
       },
       createdAt: {
         field: "created_at",
@@ -40,12 +48,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "image",
-      tableName: "store_images",
+      modelName: "commodity",
+      tableName: "commodities",
     }
   );
 
-  paginate(Image);
+  paginate(Commodity);
 
-  return Image;
+  return Commodity;
 };

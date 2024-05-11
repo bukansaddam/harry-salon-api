@@ -5,11 +5,11 @@ const { paginate } = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
   class Store extends Model {
     static associate(models) {
-      Store.hasMany(models.image, {
-        foreignKey: "storeId",
-      });
       Store.belongsTo(models.owner, {
         foreignKey: "ownerId",
+      });
+      Store.hasMany(models.image, {
+        foreignKey: "storeId",
       });
     }
   }

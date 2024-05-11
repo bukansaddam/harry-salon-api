@@ -10,6 +10,7 @@ var ownerRouter = require("../routes/owners");
 var employeeRouter = require("../routes/employees");
 var hairstyleRouter = require("../routes/hairstyles");
 var storeRouter = require("../routes/stores");
+var commodityRouter = require("../routes/commodities");
 
 var app = express();
 
@@ -27,5 +28,6 @@ app.use("/owners", ownerRouter);
 app.use("/employees", employeeRouter);
 app.use("/hairstyles", hairstyleRouter);
 app.use("/stores", storeRouter);
+app.use("/commodity", commodityRouter);
 
 module.exports = app;

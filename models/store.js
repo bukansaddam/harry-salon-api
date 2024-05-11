@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
       Store.hasMany(models.image, {
         foreignKey: "storeId",
       });
+      Store.belongsTo(models.owner, {
+        foreignKey: "ownerId",
+      });
     }
   }
 
@@ -27,8 +30,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
-      location: {
-        type: DataTypes.STRING(100),
+      longitude: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+      },
+      latitude: {
+        type: DataTypes.DOUBLE,
         allowNull: false,
       },
       open: {
@@ -42,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.STRING(10),
         allowNull: true,
+      },
+      ownerId: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
       },
       createdAt: {
         field: "created_at",

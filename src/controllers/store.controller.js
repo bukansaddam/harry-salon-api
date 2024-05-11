@@ -1,8 +1,19 @@
 const { store, image } = require("../../models/");
 const { Op, where } = require("sequelize");
+const jwt = require("jsonwebtoken");
+dotenv = require("dotenv");
+dotenv.config();
 
 async function createStore(req, res) {
   const { name, description, location, open, close, status } = req.body;
+  const token = req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Token is missing",
+    });
+  }
 
   try {
     if (!req.files || req.files.length === 0) {
@@ -14,6 +25,10 @@ async function createStore(req, res) {
 
     const storeImages = req.files.map((file) => file.path);
 
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = decoded.userId;
+
     const newStore = await store.create({
       name,
       description,
@@ -21,6 +36,7 @@ async function createStore(req, res) {
       open,
       close,
       status,
+      ownerId: userId,
     });
 
     for (let i = 0; i < storeImages.length; i++) {
@@ -96,7 +112,7 @@ async function getStore(req, res) {
 async function getAllStoreById(req, res) {
   const { id } = req.params;
   try {
-    const result = await store.findAll({ where: { id } });
+    const result = await store.findAll({ where: { ownerId: id } });
     if (!result) {
       return res.status(404).json({
         success: false,

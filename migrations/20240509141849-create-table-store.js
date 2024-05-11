@@ -18,8 +18,12 @@ module.exports = {
         type: Sequelize.STRING(100),
         allowNull: false,
       },
-      location: {
-        type: Sequelize.STRING(100),
+      longitude: {
+        type: Sequelize.DOUBLE,
+        allowNull: false,
+      },
+      latitude: {
+        type: Sequelize.DOUBLE,
         allowNull: false,
       },
       open: {
@@ -33,6 +37,16 @@ module.exports = {
       status: {
         type: Sequelize.STRING(10),
         allowNull: true,
+      },
+      ownerId: {
+        type: Sequelize.STRING(10),
+        allowNull: false,
+        references: {
+          model: "owners",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       createdAt: {
         field: "created_at",

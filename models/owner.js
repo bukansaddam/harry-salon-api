@@ -5,7 +5,9 @@ const { paginate } = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
   class Owner extends Model {
     static associate(models) {
-      // define association here
+      Owner.hasMany(models.store, {
+        foreignKey: "ownerId",
+      });
     }
   }
 

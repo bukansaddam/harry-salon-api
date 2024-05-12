@@ -3,15 +3,15 @@ const { Model } = require("sequelize");
 const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
-  class Employee extends Model {
+  class Deduction extends Model {
     static associate(models) {
-      Employee.hasMany(models.payslip, {
-        foreignKey: "employeeId",
+      Deduction.belongsTo(models.payslip, {
+        foreignKey: "payslipId",
       });
     }
   }
 
-  Employee.init(
+  Deduction.init(
     {
       id: {
         type: DataTypes.STRING(10),
@@ -23,31 +23,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
-      email: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: DataTypes.STRING(100),
+      amount: {
+        type: DataTypes.INTEGER,
         allowNull: false,
       },
-      phone: {
-        type: DataTypes.INTEGER(13),
-        allowNull: false,
-      },
-      address: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      avatar: {
-        type: DataTypes.STRING(),
+      payslipId: {
+        type: DataTypes.STRING(10),
         allowNull: true,
       },
-      // storeId: {
-      //   type: DataTypes.STRING(10),
-      //   allowNull: true,
-      // },
       createdAt: {
         field: "created_at",
         type: DataTypes.DATE,
@@ -61,12 +44,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "employee",
-      tableName: "employees",
+      modelName: "deduction",
+      tableName: "deductions",
     }
   );
 
-  paginate(Employee);
+  paginate(Deduction);
 
-  return Employee;
+  return Deduction;
 };

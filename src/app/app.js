@@ -11,6 +11,7 @@ var employeeRouter = require("../routes/employees");
 var hairstyleRouter = require("../routes/hairstyles");
 var storeRouter = require("../routes/stores");
 var commodityRouter = require("../routes/commodities");
+var payslipRouter = require("../routes/payslips");
 
 var app = express();
 
@@ -29,5 +30,6 @@ app.use("/employees", employeeRouter);
 app.use("/hairstyles", hairstyleRouter);
 app.use("/stores", storeRouter);
 app.use("/commodity", commodityRouter);
+app.use("/payslips", payslipRouter);
 
 module.exports = app;

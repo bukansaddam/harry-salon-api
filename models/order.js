@@ -3,18 +3,28 @@ const { Model } = require("sequelize");
 const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
-  class Employee extends Model {
+  class Order extends Model {
     static associate(models) {
-      Employee.hasMany(models.payslip, {
-        foreignKey: "employeeId",
+      Order.belongsTo(models.user, {
+        foreignKey: "userId",
+        as: "user",
       });
-      Employee.belongsTo(models.store, {
+      Order.belongsTo(models.store, {
         foreignKey: "storeId",
+        as: "store",
+      });
+      Order.belongsTo(models.employee, {
+        foreignKey: "employeeId",
+        as: "employee",
+      });
+      Order.belongsTo(models.hairstyle, {
+        foreignKey: "hairstyleId",
+        as: "hairstyle",
       });
     }
   }
 
-  Employee.init(
+  Order.init(
     {
       id: {
         type: DataTypes.STRING(10),
@@ -22,34 +32,37 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      name: {
-        type: DataTypes.STRING(100),
+      userId: {
+        type: DataTypes.STRING(10),
         allowNull: false,
-      },
-      email: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      phone: {
-        type: DataTypes.INTEGER(13),
-        allowNull: false,
-      },
-      address: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      avatar: {
-        type: DataTypes.STRING(),
-        allowNull: true,
       },
       storeId: {
         type: DataTypes.STRING(10),
+        allowNull: false,
+      },
+      employeeId: {
+        type: DataTypes.STRING(10),
         allowNull: true,
+      },
+      service_name: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+      },
+      service_price: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      description: {
+        type: DataTypes.STRING(),
+        allowNull: true,
+      },
+      hairstyleId: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
       },
       createdAt: {
         field: "created_at",
@@ -64,12 +77,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "employee",
-      tableName: "employees",
+      modelName: "order",
+      tableName: "orders",
     }
   );
 
-  paginate(Employee);
+  paginate(Order);
 
-  return Employee;
+  return Order;
 };

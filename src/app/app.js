@@ -12,6 +12,7 @@ var hairstyleRouter = require("../routes/hairstyles");
 var storeRouter = require("../routes/stores");
 var commodityRouter = require("../routes/commodities");
 var payslipRouter = require("../routes/payslips");
+var orderRouter = require("../routes/orders");
 
 var app = express();
 
@@ -31,5 +32,6 @@ app.use("/hairstyles", hairstyleRouter);
 app.use("/stores", storeRouter);
 app.use("/commodity", commodityRouter);
 app.use("/payslips", payslipRouter);
+app.use("/orders", orderRouter);
 
 module.exports = app;

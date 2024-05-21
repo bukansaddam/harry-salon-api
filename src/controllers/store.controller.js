@@ -5,7 +5,7 @@ dotenv = require("dotenv");
 dotenv.config();
 
 async function createStore(req, res) {
-  const { name, description, location, open, close, status } = req.body;
+  const { name, description, location, latitude, longitude, openAt, closeAt } = req.body;
   const token = req.headers.authorization.split(" ")[1];
 
   if (!token) {
@@ -33,9 +33,11 @@ async function createStore(req, res) {
       name,
       description,
       location,
-      open,
-      close,
-      status,
+      latitude,
+      longitude,
+      openAt,
+      closeAt,
+      isActive: true,
       ownerId: userId,
     });
 
@@ -49,7 +51,6 @@ async function createStore(req, res) {
     return res.status(200).json({
       success: true,
       message: "Store created successfully",
-      data: newStore,
     });
   } catch (error) {
     console.log(error);
@@ -162,7 +163,7 @@ async function getDetailStore(req, res) {
 
 async function updateStore(req, res) {
   const { id } = req.params;
-  const { name, description, location, open, close, status } = req.body;
+  const { name, description, location, openAt, closeAt, status } = req.body;
 
   try {
     const existingStore = await store.findOne({ where: { id } });
@@ -176,8 +177,8 @@ async function updateStore(req, res) {
     if (name) existingStore.name = name;
     if (description) existingStore.description = description;
     if (location) existingStore.location = location;
-    if (open) existingStore.open = open;
-    if (close) existingStore.close = close;
+    if (openAt) existingStore.openAt = openAt;
+    if (closeAt) existingStore.closeAt = closeAt;
     if (status) existingStore.status = status;
     if (req.files && req.files.length > 0) {
       const storeImages = req.files.map((file) => file.path);

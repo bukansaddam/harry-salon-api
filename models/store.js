@@ -36,24 +36,28 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(100),
         allowNull: false,
       },
+      location: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+      },
       longitude: {
         type: DataTypes.DOUBLE,
-        allowNull: false,
+        allowNull: true,
       },
       latitude: {
         type: DataTypes.DOUBLE,
-        allowNull: false,
+        allowNull: true,
       },
-      open: {
+      openAt: {
         type: DataTypes.TIME,
         allowNull: false,
       },
-      close: {
+      closeAt: {
         type: DataTypes.TIME,
         allowNull: false,
       },
-      status: {
-        type: DataTypes.STRING(10),
+      isActive: {
+        type: DataTypes.BOOLEAN,
         allowNull: true,
       },
       ownerId: {

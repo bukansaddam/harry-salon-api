@@ -3,12 +3,15 @@ var router = express.Router();
 const userController = require("../controllers/user.controller");
 const ownerController = require("../controllers/owner.controller");
 const employeeController = require("../controllers/employee.controller");
+const cors = require("cors");
 const {
   isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
 } = require("../middlewares/auth");
+
+router.use(cors());
 
 router.post("/users/signup", userController.signUp);
 router.post("/users/signin", userController.signIn);

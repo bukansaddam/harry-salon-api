@@ -107,7 +107,7 @@ async function getDetailOrder(req, res) {
 
     const dataUser = await user.findOne({
       where: { id: result.userId },
-      attributes: ["name"],
+      attributes: ["name", "image"],
     });
 
     const dataStore = await store.findOne({

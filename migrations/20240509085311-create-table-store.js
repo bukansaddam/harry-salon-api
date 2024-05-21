@@ -18,24 +18,28 @@ module.exports = {
         type: Sequelize.STRING(100),
         allowNull: false,
       },
+      location: {
+        type: Sequelize.STRING(100),
+        allowNull: false,
+      },
       longitude: {
         type: Sequelize.DOUBLE,
-        allowNull: false,
+        allowNull: true,
       },
       latitude: {
         type: Sequelize.DOUBLE,
-        allowNull: false,
+        allowNull: true,
       },
-      open: {
+      openAt: {
         type: Sequelize.TIME,
         allowNull: false,
       },
-      close: {
+      closeAt: {
         type: Sequelize.TIME,
         allowNull: false,
       },
-      status: {
-        type: Sequelize.STRING(10),
+      isActive: {
+        type: Sequelize.BOOLEAN,
         allowNull: true,
       },
       ownerId: {

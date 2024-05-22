@@ -1,5 +1,5 @@
-const { store, image } = require("../../models/");
-const { Op, where } = require("sequelize");
+const { store, image, employee, sequelize } = require("../../models/");
+const { Op, where, Sequelize } = require("sequelize");
 const jwt = require("jsonwebtoken");
 dotenv = require("dotenv");
 dotenv.config();
@@ -111,21 +111,75 @@ async function getStore(req, res) {
 }
 
 async function getAllStoreById(req, res) {
-  const { id } = req.params;
   try {
-    const result = await store.findAll({ where: { ownerId: id } });
-    if (!result) {
+    const token = req.headers.authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: Token is missing",
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId;
+
+    const searchTerm = req.query.q;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    let order = [["created_at", "ASC"]];
+
+    const whereClause = { ownerId: userId };
+    if (searchTerm) {
+      whereClause.name = { [Op.like]: `%${searchTerm}%` };
+    }
+
+    const result = await store.paginate({
+      attributes: [
+        "id",
+        "name",
+        "location",
+        "isActive",
+        [
+          sequelize.fn("COUNT", sequelize.col("employees.id")),
+          "totalEmployees",
+        ],
+      ],
+      include: [
+        {
+          model: employee,
+          attributes: [],
+          duplicating: false,
+        },
+      ],
+      group: ["store.id"],
+      page: page,
+      paginate: pageSize,
+      where: whereClause,
+      order: order,
+    });
+
+    const response = {
+      total_count: result.total,
+      total_pages: result.pages,
+      data: result.docs,
+    };
+
+    if (result.docs.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Store not found",
+        result: response,
       });
     }
+
     return res.status(200).json({
       success: true,
       message: "Store retrieved successfully",
-      data: result,
+      result: response,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -179,7 +233,7 @@ async function updateStore(req, res) {
     if (location) existingStore.location = location;
     if (openAt) existingStore.openAt = openAt;
     if (closeAt) existingStore.closeAt = closeAt;
-    if (status) existingStore.status = status;
+    if (status) existingStore.isActive = status;
     if (req.files && req.files.length > 0) {
       const storeImages = req.files.map((file) => file.path);
 

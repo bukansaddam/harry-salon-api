@@ -26,7 +26,8 @@ router.get(
   storeController.getStore
 );
 router.get(
-  "/all/:id",
+  "/all",
+  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

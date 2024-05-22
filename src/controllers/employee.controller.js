@@ -193,7 +193,7 @@ async function getDetailEmployee(req, res) {
 
 async function updateEmployee(req, res) {
   const { id } = req.params;
-  const { name, email, phone, address } = req.body;
+  const { name, email, phone, address, storeId } = req.body;
 
   try {
     const existingEmployee = await employee.findOne({ where: { id } });
@@ -218,6 +218,7 @@ async function updateEmployee(req, res) {
     if (phone) existingEmployee.phone = phone;
     if (address) existingEmployee.address = address;
     if (req.file) existingEmployee.avatar = req.file.path;
+    if (storeId) existingEmployee.storeId = storeId;
 
     await existingEmployee.save();
 

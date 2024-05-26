@@ -20,11 +20,27 @@ router.get(
   employeeController.getEmployee
 );
 router.get(
+  "/all",
+  isOwner,
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  employeeController.getEmployeeByOwner
+);
+router.get(
   "/:id",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
   employeeController.getDetailEmployee
+);
+router.get(
+  "/store/:storeId",
+  isOwner,
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  employeeController.getEmployeeByStore
 );
 router.put(
   "/:id",

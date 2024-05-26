@@ -51,6 +51,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(10),
         allowNull: true,
       },
+      createdBy: {
+        field: "created_by",
+        type: DataTypes.STRING(10),
+        allowNull: false,
+      },
       createdAt: {
         field: "created_at",
         type: DataTypes.DATE,

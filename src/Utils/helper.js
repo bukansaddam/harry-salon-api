@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 dotenv = require("dotenv");
 dotenv.config();
 
-async function getIdUser() {
+async function getIdUser(req) {
   const token = req.headers.authorization.split(" ")[1];
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   return decoded.userId;

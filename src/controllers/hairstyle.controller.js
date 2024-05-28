@@ -1,16 +1,31 @@
-const { hairstyle } = require("../../models/");
+const { limit } = require("firebase/firestore");
+const { hairstyle, hairstyleImage } = require("../../models/");
 const { Op } = require("sequelize");
 
 async function createHairstyle(req, res) {
   const { name, description } = req.body;
 
   try {
-    const hairstyleImage = req.file.path;
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const images = req.files.map((file) => file.path);
+
     const newHairstyle = await hairstyle.create({
-      image : hairstyleImage,
       name,
-      description
+      description,
     });
+
+    for (let i = 0; i < images.length; i++) {
+      await hairstyleImage.create({
+        image: images[i],
+        hairstyleId: newHairstyle.id,
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -28,7 +43,7 @@ async function createHairstyle(req, res) {
 
 async function getHairstyle(req, res) {
   try {
-    const searchTerm = req.query.q;
+    const searchTerm = req.query.name;
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
@@ -37,25 +52,45 @@ async function getHairstyle(req, res) {
     const whereClause = {};
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
-
       order = [];
     }
 
     const result = await hairstyle.paginate({
+      attributes: ["id", "name", "description"],
       page: page,
       paginate: pageSize,
       where: whereClause,
       order: order,
+      include: [
+        {
+          model: hairstyleImage,
+          attributes: ["image"],
+          duplicating: false,
+          limit: 1,
+        },
+      ],
     });
 
     const response = {
       total_count: result.total,
       total_pages: result.pages,
-      data: result.docs,
+      data: result.docs.map((hairstyle) => {
+        const firstImage =
+          hairstyle.hairstyleImages.length > 0
+            ? hairstyle.hairstyleImages[0].image
+            : null;
+        return {
+          id: hairstyle.id,
+          name: hairstyle.name,
+          description: hairstyle.description,
+          image: firstImage,
+        };
+      }),
     };
 
     if (result.docs.length === 0) {
       return res.status(404).json({
+        success: false,
         message: "Hairstyle not found",
         result: response,
       });
@@ -78,9 +113,28 @@ async function getHairstyle(req, res) {
 async function getDetailHairstyle(req, res) {
   const { id } = req.params;
   try {
-    const result = await hairstyle.findOne({ where: { id } });
+    const result = await hairstyle.findOne({
+      where: { id },
+      include: [
+        {
+          model: hairstyleImage,
+          attributes: ["image"],
+          where: { hairstyleId: id },
+        },
+      ],
+    });
+
+    const response = {
+      id: result.id,
+      name: result.name,
+      description: result.description,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
+      images: result.hairstyleImages.map((image) => image.image),
+    };
+
     if (!result) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "Hairstyle not found",
       });
@@ -88,7 +142,7 @@ async function getDetailHairstyle(req, res) {
     return res.status(200).json({
       success: true,
       message: "Hairstyle retrieved successfully",
-      data: result,
+      data: response,
     });
   } catch (error) {
     return res.status(500).json({

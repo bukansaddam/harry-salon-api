@@ -3,15 +3,15 @@ const { Model } = require("sequelize");
 const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
-  class HairStyle extends Model {
+  class HairstyleImage extends Model {
     static associate(models) {
-      HairStyle.hasMany(models.hairstyleImage, {
+      HairstyleImage.belongsTo(models.store, {
         foreignKey: "hairstyleId",
       });
     }
   }
 
-  HairStyle.init(
+  HairstyleImage.init(
     {
       id: {
         type: DataTypes.STRING(10),
@@ -19,12 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      name: {
-        type: DataTypes.STRING(100),
+      image: {
+        type: DataTypes.STRING(),
         allowNull: false,
       },
-      description: {
-        type: DataTypes.STRING(),
+      hairstyleId: {
+        type: DataTypes.STRING(10),
         allowNull: false,
       },
       createdAt: {
@@ -40,12 +40,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "hairstyle",
-      tableName: "hairstyles",
+      modelName: "hairstyleImage",
+      tableName: "hairstyle_images",
     }
   );
 
-  paginate(HairStyle);
+  paginate(HairstyleImage);
 
-  return HairStyle;
+  return HairstyleImage;
 };

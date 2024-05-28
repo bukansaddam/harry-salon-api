@@ -15,7 +15,7 @@ router.post(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  upload.single("image"),
+  upload.array("image"),
   hairstyleController.createHairstyle
 );
 router.get(

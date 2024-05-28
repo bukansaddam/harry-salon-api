@@ -1,6 +1,7 @@
 const { store, image, employee, sequelize } = require("../../models/");
 const { Op, where, Sequelize } = require("sequelize");
 const jwt = require("jsonwebtoken");
+const { getIdUser } = require("../Utils/helper");
 dotenv = require("dotenv");
 dotenv.config();
 
@@ -25,9 +26,9 @@ async function createStore(req, res) {
 
     const storeImages = req.files.map((file) => file.path);
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const userId = decoded.userId;
+    
+    const userId = await getIdUser(req);
+    console.log(userId);
 
     const newStore = await store.create({
       name,
@@ -197,7 +198,7 @@ async function getDetailStore(req, res) {
       where: { storeId: id },
     }] });
     if (!result) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "Store not found",
       });

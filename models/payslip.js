@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
       Payslip.hasMany(models.earning, {
         foreignKey: "payslipId",
       });
+      Payslip.hasMany(models.deduction, {
+        foreignKey: "payslipId",
+      });
     }
   }
 
@@ -28,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       attachment: {
         type: DataTypes.STRING(),
-        allowNull: false,
+        allowNull: true,
       },
       total: {
         type: DataTypes.INTEGER,
@@ -37,6 +40,14 @@ module.exports = (sequelize, DataTypes) => {
       employeeId: {
         type: DataTypes.STRING(10),
         allowNull: true,
+      },
+      date: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      createdBy: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
       },
       createdAt: {
         field: "created_at",

@@ -12,11 +12,11 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING(100),
-        allowNull: false,
+        allowNull: true,
       },
       amount: {
         type: Sequelize.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       payslipId: {
         type: Sequelize.STRING(10),

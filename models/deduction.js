@@ -21,11 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       name: {
         type: DataTypes.STRING(100),
-        allowNull: false,
+        allowNull: true,
       },
       amount: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
       },
       payslipId: {
         type: DataTypes.STRING(10),

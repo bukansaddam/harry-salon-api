@@ -16,7 +16,7 @@ module.exports = {
       },
       attachment: {
         type: Sequelize.STRING(),
-        allowNull: false,
+        allowNull: true,
       },
       total: {
         type: Sequelize.INTEGER,
@@ -31,6 +31,14 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
+      },
+      date: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      createdBy: {
+        type: Sequelize.STRING(10),
+        allowNull: false,
       },
       createdAt: {
         field: 'created_at',

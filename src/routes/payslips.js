@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const hairstyleController = require("../controllers/hairstyle.controller");
+const payslipController = require("../controllers/payslip.controller");
 const { upload } = require("../middlewares/multer");
 const {
   authenticateToken,
@@ -16,21 +16,29 @@ router.post(
   authenticateRefreshToken,
   checkBlacklist,
   upload.single("attachment"),
-  hairstyleController.createHairstyle
+  payslipController.createPayslip
 );
 router.get(
-  "/",
+  "/all",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  hairstyleController.getHairstyle
+  payslipController.getPayslip
+);
+router.get(
+  "/",
+  isOwner,
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  payslipController.getPayslipByOwner
 );
 router.get(
   "/:id",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  hairstyleController.getDetailHairstyle
+  payslipController.getDetailPayslip
 );
 router.delete(
   "/:id",
@@ -38,7 +46,7 @@ router.delete(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  hairstyleController.deleteHairstyle
+  payslipController.deletePayslip
 );
 
 module.exports = router;

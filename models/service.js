@@ -5,7 +5,10 @@ const { paginate } = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
   class Service extends Model {
     static associate(models) {
-      // Define association here
+      Service.belongsTo(models.store, {
+        foreignKey: "storeId",
+        as: "store",
+      });
     }
   }
 
@@ -17,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
+      image: {
+        type: DataTypes.STRING(),
+        allowNull: false,
+      },
       name: {
         type: DataTypes.STRING(100),
         allowNull: false,
@@ -24,6 +31,16 @@ module.exports = (sequelize, DataTypes) => {
       price: {
         type: DataTypes.INTEGER,
         allowNull: false,
+      },
+      storeId: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        references: {
+          model: "stores",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       createdAt: {
         field: "created_at",

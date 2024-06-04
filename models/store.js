@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
       Store.hasMany(models.employee, {
         foreignKey: "storeId",
       });
+      Store.hasMany(models.service, {
+        foreignKey: "storeId",
+      });
     }
   }
 

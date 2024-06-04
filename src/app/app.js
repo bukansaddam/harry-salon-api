@@ -13,6 +13,7 @@ var storeRouter = require("../routes/stores");
 var commodityRouter = require("../routes/commodities");
 var payslipRouter = require("../routes/payslips");
 var orderRouter = require("../routes/orders");
+var serviceRouter = require("../routes/services");
 
 var app = express();
 
@@ -33,5 +34,6 @@ app.use("/stores", storeRouter);
 app.use("/commodity", commodityRouter);
 app.use("/payslips", payslipRouter);
 app.use("/orders", orderRouter);
+app.use("/services", serviceRouter);
 
 module.exports = app;

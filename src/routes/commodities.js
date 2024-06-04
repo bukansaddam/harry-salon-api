@@ -11,7 +11,6 @@ const {
 
 router.post(
   "/",
-  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
@@ -24,6 +23,13 @@ router.get(
   authenticateRefreshToken,
   checkBlacklist,
   commodityController.getCommodity
+);
+router.get(
+  "/store/:id",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  commodityController.getCommodityByStore
 );
 router.get(
   "/:id",

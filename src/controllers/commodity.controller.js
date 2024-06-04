@@ -29,7 +29,7 @@ async function createCommodity(req, res) {
 
 async function getCommodity(req, res) {
   try {
-    const searchTerm = req.query.q;
+    const searchTerm = req.query.name;
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
@@ -56,7 +56,58 @@ async function getCommodity(req, res) {
     };
 
     if (result.docs.length === 0) {
-      return res.status(404).json({
+      return res.status(200).json({
+        success: false,
+        message: "Commodity not found",
+        result: response,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Commodity retrieved successfully",
+      result: response,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+async function getCommodityByStore(req, res) {
+  try {
+    const searchTerm = req.query.name;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    let order = [["name", "ASC"]];
+
+    const whereClause = {storeId: req.params.id};
+    if (searchTerm) {
+      whereClause.name = { [Op.like]: `%${searchTerm}%` };
+
+      order = [];
+    }
+
+    const result = await commodity.paginate({
+      page: page,
+      paginate: pageSize,
+      where: whereClause,
+      order: order,
+    });
+
+    const response = {
+      total_count: result.total,
+      total_pages: result.pages,
+      data: result.docs,
+    };
+
+    if (result.docs.length === 0) {
+      return res.status(200).json({
+        success: false,
         message: "Commodity not found",
         result: response,
       });
@@ -81,7 +132,7 @@ async function getDetailCommodity(req, res) {
   try {
     const result = await commodity.findOne({ where: { id } });
     if (!result) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "Commodity not found",
       });
@@ -157,6 +208,7 @@ async function deleteCommodity(req, res) {
 module.exports = {
   createCommodity,
   getCommodity,
+  getCommodityByStore,
   getDetailCommodity,
   updateCommodity,
   deleteCommodity,

@@ -5,7 +5,12 @@ const { paginate } = require("sequelize-paginate");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // define association here
+      User.hasMany(models.review, {
+        foreignKey: "userId",
+      });
+      User.hasMany(models.order, {
+        foreignKey: "userId",
+      });
     }
   }
 

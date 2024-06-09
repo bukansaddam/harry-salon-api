@@ -3,24 +3,34 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable("services", {
+    await queryInterface.createTable("reviews", {
       id: {
         type: Sequelize.STRING(10),
         primaryKey: true,
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      image: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      price: {
+      rating: {
         type: Sequelize.INTEGER,
         allowNull: false,
+      },
+      comment: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      date: {
+        type: Sequelize.DATE,
+        allowNull: false,
+      },
+      userId: {
+        type: Sequelize.STRING(10),
+        allowNull: true,
+        references: {
+          model: "users",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
       },
       storeId: {
         type: Sequelize.STRING(10),
@@ -46,6 +56,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable("services");
+    await queryInterface.dropTable("reviews");
   }
 };

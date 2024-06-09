@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
       Store.hasMany(models.service, {
         foreignKey: "storeId",
       });
+      Store.hasMany(models.review, {
+        foreignKey: "storeId",
+      });
     }
   }
 

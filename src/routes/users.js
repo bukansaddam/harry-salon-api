@@ -16,14 +16,14 @@ router.get(
   userController.getUser
 );
 router.get(
-  "/:id",
+  "/detail",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
   userController.getDetailUser
 );
 router.put(
-  "/:id",
+  "/",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

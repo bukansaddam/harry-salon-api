@@ -8,6 +8,9 @@ module.exports = (sequelize, DataTypes) => {
       HairStyle.hasMany(models.hairstyleImage, {
         foreignKey: "hairstyleId",
       });
+      HairStyle.hasMany(models.order, {
+        foreignKey: "hairstyleId",
+      });
     }
   }
 

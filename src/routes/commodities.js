@@ -40,7 +40,6 @@ router.get(
 );
 router.put(
   "/:id",
-  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

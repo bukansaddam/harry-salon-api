@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
       Employee.belongsTo(models.store, {
         foreignKey: "storeId",
       });
+      Employee.hasMany(models.order, {
+        foreignKey: "employeeId",
+      });
     }
   }
 

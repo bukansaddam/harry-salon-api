@@ -11,11 +11,9 @@ const {
 
 router.post(
   "/",
-  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  upload.single("image"),
   orderController.createOrder
 );
 router.get(
@@ -26,6 +24,20 @@ router.get(
   orderController.getOrder
 );
 router.get(
+  "/current",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  orderController.getOrderById
+);
+router.get(
+  "/service",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  orderController.getOrderByService
+);
+router.get(
   "/:id",
   authenticateToken,
   authenticateRefreshToken,
@@ -34,7 +46,6 @@ router.get(
 );
 router.put(
   "/:id",
-  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
@@ -42,7 +53,6 @@ router.put(
 );
 router.delete(
   "/:id",
-  isOwner,
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

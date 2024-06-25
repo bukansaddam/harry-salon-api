@@ -23,6 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       Store.hasMany(models.review, {
         foreignKey: "storeId",
       });
+      Store.hasMany(models.order, {
+        foreignKey: "storeId",
+      });
     }
   }
 

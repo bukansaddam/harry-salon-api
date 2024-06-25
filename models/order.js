@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "hairstyleId",
         as: "hairstyle",
       });
+      Order.belongsTo(models.service, {
+        foreignKey: "serviceId",
+        as: "service",
+      });
     }
   }
 
@@ -31,6 +35,11 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         allowNull: false,
         defaultValue: () => nanoid(10),
+      },
+      sequence: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
       },
       userId: {
         type: DataTypes.STRING(10),
@@ -44,13 +53,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(10),
         allowNull: true,
       },
-      service_name: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      service_price: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
+      serviceId: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
       },
       description: {
         type: DataTypes.STRING(),
@@ -63,6 +68,21 @@ module.exports = (sequelize, DataTypes) => {
       status: {
         type: DataTypes.STRING(10),
         allowNull: false,
+        defaultValue: "pending",
+      },
+      isAccepted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      isOnLocation: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      date: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
       createdAt: {
         field: "created_at",

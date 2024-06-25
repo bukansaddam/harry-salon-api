@@ -64,7 +64,7 @@ async function createStore(req, res) {
 
 async function getStore(req, res) {
   try {
-    const searchTerm = req.query.q;
+    const searchTerm = req.query.name;
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 

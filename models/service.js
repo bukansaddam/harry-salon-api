@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "storeId",
         as: "store",
       });
+      Service.hasMany(models.order, {
+        foreignKey: "serviceId",
+      });
     }
   }
 

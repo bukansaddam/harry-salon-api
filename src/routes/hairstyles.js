@@ -20,16 +20,10 @@ router.post(
 );
 router.get(
   "/",
-  authenticateToken,
-  authenticateRefreshToken,
-  checkBlacklist,
   hairstyleController.getHairstyle
 );
 router.get(
   "/:id",
-  authenticateToken,
-  authenticateRefreshToken,
-  checkBlacklist,
   hairstyleController.getDetailHairstyle
 );
 router.put(

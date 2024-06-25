@@ -10,6 +10,11 @@ module.exports = {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
+      sequence: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 1,
+      },
       userId: {
         type: Sequelize.STRING(10),
         allowNull: false,
@@ -40,13 +45,15 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "NO ACTION",
       },
-      service_name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      service_price: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
+      serviceId: {
+        type: Sequelize.STRING(10),
+        allowNull: true,
+        references: {
+          model: "services",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "NO ACTION"
       },
       description: {
         type: Sequelize.STRING(),
@@ -66,6 +73,20 @@ module.exports = {
         type: Sequelize.STRING(10),
         allowNull: false,
         defaultValue: "pending",
+      },
+      isAccepted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      isOnLocation: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      date: {
+        type: Sequelize.DATE,
+        allowNull: true,
       },
       createdAt: {
         field: "created_at",

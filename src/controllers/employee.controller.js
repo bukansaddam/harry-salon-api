@@ -64,7 +64,7 @@ async function signIn(req, res) {
   try {
     const existingEmployee = await employee.findOne({ where: { email } });
     if (!existingEmployee) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "Invalid credentials",
       });
@@ -74,7 +74,7 @@ async function signIn(req, res) {
       existingEmployee.password
     );
     if (!isPasswordValid) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "Invalid credentials",
       });
@@ -82,10 +82,13 @@ async function signIn(req, res) {
 
     const accessToken = generateAccessToken(existingEmployee);
 
+    const storeId = existingEmployee.storeId;
+
     return res.status(200).json({
       success: true,
       message: "Employee logged in successfully",
       token: accessToken,
+      storeId: storeId,
     });
   } catch (error) {
     return res.status(500).json({

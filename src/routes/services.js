@@ -26,9 +26,6 @@ router.get(
 );
 router.get(
   "/store/:id",
-  authenticateToken,
-  authenticateRefreshToken,
-  checkBlacklist,
   serviceController.getServiceByStore
 );
 router.get(

@@ -7,6 +7,7 @@ const {
 const bcrypt = require("bcrypt");
 const { validateUser } = require("../validators/validator");
 const { Op } = require("sequelize");
+const { getIdUser } = require("../Utils/helper");
 
 async function signUp(req, res) {
   const { name, email, password, phone, address } = req.body;
@@ -56,7 +57,7 @@ async function signIn(req, res) {
   try {
     const existingUser = await user.findOne({ where: { email } });
     if (!existingUser) {
-      return res.status(404).json({
+      return res.status(200).json({
         success: false,
         message: "Invalid credentials",
       });
@@ -66,7 +67,7 @@ async function signIn(req, res) {
       existingUser.password
     );
     if (!isPasswordValid) {
-      return res.status(400).json({
+      return res.status(200).json({
         success: false,
         message: "Invalid credentials",
       });
@@ -169,7 +170,7 @@ async function getUser(req, res) {
 }
 
 async function getDetailUser(req, res) {
-  const { id } = req.params;
+  const id = await getIdUser(req);
   try {
     const result = await user.findOne({ where: { id } });
     if (!result) {
@@ -184,15 +185,15 @@ async function getDetailUser(req, res) {
       data: result,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: id,
-    });
-  }
+  return res.status(500).json({
+    success: false,
+    message: `Error for user with id ${id}: ${error.message}`,
+  });
+}
 }
 
 async function updateUser(req, res) {
-  const { id } = req.params;
+  const id = await getIdUser(req);
   const { name, email, phone, address } = req.body;
 
   try {
@@ -220,6 +221,8 @@ async function updateUser(req, res) {
     if (req.file) existingUser.avatar = req.file.path;
 
     await existingUser.save();
+
+    console.log(existingUser);
 
     return res.status(200).json({
       success: true,

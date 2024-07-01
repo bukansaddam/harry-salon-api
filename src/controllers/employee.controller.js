@@ -285,7 +285,7 @@ async function getEmployeeByStore(req, res) {
 }
 
 async function getDetailEmployee(req, res) {
-  const { id } = req.params;
+  const id = await getIdUser(req);
   try {
     const result = await employee.findOne({ where: { id } });
 

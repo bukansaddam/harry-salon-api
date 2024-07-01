@@ -24,6 +24,13 @@ router.get(
   orderController.getOrder
 );
 router.get(
+  "/employee",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  orderController.getOrderEmployee
+);
+router.get(
   "/current",
   authenticateToken,
   authenticateRefreshToken,

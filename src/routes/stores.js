@@ -20,6 +20,9 @@ router.post(
 );
 router.get(
   "/",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
   storeController.getStore
 );
 router.get(

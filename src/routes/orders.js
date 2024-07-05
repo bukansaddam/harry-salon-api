@@ -51,6 +51,13 @@ router.get(
   checkBlacklist,
   orderController.getDetailOrder
 );
+router.get(
+  "/time/:id",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  orderController.getWaitingTime
+);
 router.put(
   "/:id",
   authenticateToken,

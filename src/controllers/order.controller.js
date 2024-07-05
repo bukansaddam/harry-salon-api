@@ -66,8 +66,14 @@ async function updateOrderStatusToDelay() {
 cron.schedule("* * * * *", updateOrderStatusToDelay);
 
 async function createOrder(req, res) {
-  const { storeId, serviceId, description, hairstyleId, date, employeeId } =
-    req.body;
+  const {
+    storeId,
+    serviceId,
+    description,
+    hairstyleId = null,
+    date,
+    employeeId,
+  } = req.body;
 
   try {
     const userId = await getIdUser(req);
@@ -84,7 +90,7 @@ async function createOrder(req, res) {
       serviceId,
       description,
       userId,
-      hairstyleId,
+      hairstyleId: hairstyleId ? hairstyleId : null,
       date,
       sequence: newSequence,
     });
@@ -98,6 +104,74 @@ async function createOrder(req, res) {
     console.log(error);
     return res.status(500).json({
       sucess: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+async function getWaitingTime(req, res) {
+  try {
+    const storeId = req.params.id;
+    const userId = await getIdUser(req); // Pastikan Anda memiliki fungsi ini
+
+    const whereClause = {
+      storeId: storeId,
+      status: { [Op.ne]: "done" },
+    };
+
+    const orders = await order.findAll({
+      where: whereClause,
+      order: [
+        ["sequence", "ASC"],
+        ["createdAt", "ASC"],
+      ],
+      include: [
+        {
+          model: store,
+          as: "store",
+          attributes: ["name", "location"],
+        },
+        {
+          model: service,
+          as: "service",
+          attributes: ["name", "price", "duration"],
+        },
+        {
+          model: employee,
+          as: "employee",
+          attributes: ["name", "avatar"],
+        },
+        {
+          model: hairstyle,
+          as: "hairstyle",
+        },
+        {
+          model: user,
+          as: "user",
+          attributes: ["name", "avatar", "phone"],
+        },
+      ],
+    });
+
+    const totalDuration = orders.reduce(
+      (acc, order) => acc + (order.service?.duration || 0),
+      0
+    );
+
+    const response = {
+      totalOrder: orders.length,
+      totalDuration: totalDuration,
+    };
+
+    return res.status(200).json({
+      success: true,
+      message: "Orders retrieved successfully",
+      result: response,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
       message: "Internal server error",
     });
   }
@@ -144,7 +218,7 @@ async function getOrder(req, res) {
         {
           model: service,
           as: "service",
-          attributes: ["name", "price"],
+          attributes: ["name", "price", "duration"],
           duplicating: false,
         },
         {
@@ -187,6 +261,7 @@ async function getOrder(req, res) {
         storeLocation: order.store.location,
         serviceName: order.service.name,
         servicePrice: order.service.price,
+        serviceDuration: order.service.duration,
         status: order.status,
         date: order.date,
         employeeAvatar: order.employee?.avatar,
@@ -621,7 +696,6 @@ async function updateOrder(req, res) {
 
     await sequelize.transaction(async (t) => {
       const orderToUpdate = await order.findByPk(id, { transaction: t });
-
       if (!orderToUpdate) {
         return res.status(404).json({
           success: false,
@@ -629,7 +703,33 @@ async function updateOrder(req, res) {
         });
       }
 
-      if (isAccepted) {
+      if (orderToUpdate.status !== status && status === "delay") {
+        const currentSequence = orderToUpdate.sequence;
+        const nextOrder = await order.findOne({
+          where: { sequence: currentSequence + 1 },
+          transaction: t,
+        });
+
+        if (nextOrder) {
+          await Promise.all([
+            orderToUpdate.update(
+              {
+                sequence: currentSequence + 1,
+                status: "pending",
+                isAccepted: false,
+                employeeId: null,
+              },
+              { transaction: t }
+            ),
+            nextOrder.update({ sequence: currentSequence }, { transaction: t }),
+          ]);
+        } else {
+          await orderToUpdate.update(
+            { status: "pending", isAccepted: false, employeeId: null },
+            { transaction: t }
+          );
+        }
+      } else if (isAccepted) {
         await orderToUpdate.update(
           { isAccepted: isAccepted, status: "waiting", employeeId: userId },
           { transaction: t }
@@ -641,6 +741,13 @@ async function updateOrder(req, res) {
         );
       } else if (status === "done") {
         await orderToUpdate.update({ status }, { transaction: t });
+      } else {
+        await orderToUpdate.update(
+          {
+            status,
+          },
+          { transaction: t }
+        );
       }
 
       if (
@@ -649,6 +756,8 @@ async function updateOrder(req, res) {
         status !== "done"
       ) {
         const currentSequence = orderToUpdate.sequence;
+
+        // Update all orders with sequence greater than current order
         await order.update(
           { sequence: sequelize.literal("sequence - 1") },
           {
@@ -721,6 +830,7 @@ module.exports = {
   getOrderEmployee,
   getOrderByService,
   getOrderById,
+  getWaitingTime,
   getDetailOrder,
   updateOrder,
   deleteOrder,

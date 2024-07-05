@@ -35,6 +35,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      duration: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       storeId: {
         type: DataTypes.STRING(10),
         allowNull: true,
@@ -43,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
           key: "id",
         },
         onUpdate: "CASCADE",
-        onDelete: "SET NULL",
+        onDelete: "NO ACTION",
       },
       createdAt: {
         field: "created_at",

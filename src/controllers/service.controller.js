@@ -2,7 +2,7 @@ const { service } = require("../../models/");
 const { Op } = require("sequelize");
 
 async function createService(req, res) {
-  const { name, price, storeId } = req.body;
+  const { name, price, duration, storeId } = req.body;
 
   try {
     const serviceImage = req.file.path;
@@ -10,6 +10,7 @@ async function createService(req, res) {
       image: serviceImage,
       name,
       price,
+      duration,
       storeId,
     });
 
@@ -152,7 +153,7 @@ async function getDetailService(req, res) {
 
 async function updateService(req, res) {
   const { id } = req.params;
-  const { name, price, storeId } = req.body;
+  const { name, price, duration, storeId } = req.body;
 
   try {
     const existingService = await service.findOne({ where: { id } });
@@ -165,6 +166,7 @@ async function updateService(req, res) {
 
     if (name) existingService.name = name;
     if (price) existingService.price = price;
+    if (duration) existingService.duration = duration;
     if (storeId) existingService.storeId = storeId;
     if (req.file) existingService.image = req.file.path;
 

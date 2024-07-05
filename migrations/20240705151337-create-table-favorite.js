@@ -3,53 +3,47 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable("services", {
+    await queryInterface.createTable("favorites", {
       id: {
         type: Sequelize.STRING(10),
         primaryKey: true,
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      image: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      price: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      duration: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      storeId: {
+      userId: {
         type: Sequelize.STRING(10),
         allowNull: true,
         references: {
-          model: "stores",
+          model: "users",
           key: "id",
         },
         onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+      },
+      hairstyleId: {
+        type: Sequelize.STRING(10),
+        allowNull: true,
+        references: {
+          model: "hairstyles",
+          key: "id",
+        },
+        onUpdate: "NO ACTION",
         onDelete: "NO ACTION",
       },
       createdAt: {
         field: "created_at",
-        type: Sequelize.DATE,
         allowNull: false,
+        type: Sequelize.DATE,
       },
       updatedAt: {
         field: "updated_at",
-        type: Sequelize.DATE,
         allowNull: false,
+        type: Sequelize.DATE,
       },
     });
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable("services");
+    await queryInterface.dropTable("favorites");
   }
 };

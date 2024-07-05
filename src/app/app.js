@@ -15,6 +15,7 @@ var payslipRouter = require("../routes/payslips");
 var orderRouter = require("../routes/orders");
 var serviceRouter = require("../routes/services");
 var reviewRouter = require("../routes/reviews");
+var favoriteRouter = require("../routes/favorites");
 
 var app = express();
 
@@ -37,5 +38,6 @@ app.use("/payslips", payslipRouter);
 app.use("/orders", orderRouter);
 app.use("/services", serviceRouter);
 app.use("/reviews", reviewRouter);
+app.use("/favorites", favoriteRouter);
 
 module.exports = app;

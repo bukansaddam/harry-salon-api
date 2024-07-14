@@ -25,6 +25,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "serviceId",
         as: "service",
       });
+      Order.hasMany(models.orderHistory, {
+        foreignKey: "orderId",
+      });
     }
   }
 
@@ -83,6 +86,11 @@ module.exports = (sequelize, DataTypes) => {
       date: {
         type: DataTypes.DATE,
         allowNull: true,
+      },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
       createdAt: {
         field: "created_at",

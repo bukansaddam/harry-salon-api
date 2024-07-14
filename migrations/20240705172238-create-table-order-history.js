@@ -3,43 +3,22 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('commodities', {
+    await queryInterface.createTable('order_histories', {
       id: {
         type: Sequelize.STRING(10),
         primaryKey: true,
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      image: {
-        type: Sequelize.STRING(),
-        allowNull: false,
-      },
-      name: {
-        type: Sequelize.STRING(100),
-        allowNull: false,
-      },
-      stock: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-      },
-      category: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-      },
-      storeId: {
+      orderId: {
         type: Sequelize.STRING(10),
-        allowNull: true,
+        allowNull: false,
         references: {
-          model: 'stores',
+          model: 'orders',
           key: 'id',
         },
         onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-      },
-      isDeleted: {
-        type: Sequelize.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
+        onDelete: 'CASCADE',
       },
       createdAt: {
         field: 'created_at',
@@ -55,6 +34,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('commodities');
+    await queryInterface.dropTable('order_histories');
   }
 };

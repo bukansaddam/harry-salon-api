@@ -8,12 +8,12 @@ const {
   service,
   Sequelize,
   sequelize,
+  orderHistory,
 } = require("../../models/");
 const { Op, where } = require("sequelize");
 const { getIdUser } = require("../Utils/helper");
 const { paginate } = require("sequelize-paginate");
 const cron = require("node-cron");
-const axios = require("axios");
 
 async function updateOrderStatusToDelay() {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -112,11 +112,12 @@ async function createOrder(req, res) {
 async function getWaitingTime(req, res) {
   try {
     const storeId = req.params.id;
-    const userId = await getIdUser(req); // Pastikan Anda memiliki fungsi ini
+    const userId = await getIdUser(req);
 
     const whereClause = {
       storeId: storeId,
       status: { [Op.ne]: "done" },
+      isDeleted: false,
     };
 
     const orders = await order.findAll({
@@ -198,6 +199,7 @@ async function getOrder(req, res) {
 
     const whereClause = {
       storeId: { [Op.in]: userStoreIds },
+      isDeleted: false,
     };
 
     const result = await order.paginate({
@@ -311,6 +313,7 @@ async function getOrderEmployee(req, res) {
 
     const whereClause = {
       storeId: { [Op.in]: employeeStoreIds },
+      isDeleted: false,
     };
 
     const result = await order.paginate({
@@ -424,6 +427,7 @@ async function getOrderByService(req, res) {
 
     const whereClause = {
       serviceId: { [Op.in]: userServiceIds },
+      isDeleted: false,
     };
 
     const result = await order.paginate({
@@ -515,7 +519,7 @@ async function getOrderById(req, res) {
   try {
     const userId = await getIdUser(req);
 
-    const whereClause = { userId: userId };
+    const whereClause = { userId: userId, isDeleted: false };
 
     const orderData = await order.findOne({
       where: whereClause,
@@ -741,6 +745,12 @@ async function updateOrder(req, res) {
         );
       } else if (status === "done") {
         await orderToUpdate.update({ status }, { transaction: t });
+        await orderHistory.create(
+          {
+            orderId: orderToUpdate.id
+          },
+          { transaction: t }
+        );
       } else {
         await orderToUpdate.update(
           {
@@ -799,7 +809,7 @@ async function deleteOrder(req, res) {
 
     const deletedOrderSequence = existingOrder.sequence;
 
-    await existingOrder.destroy();
+    await existingOrder.update({ isDeleted: true, sequence: 0});
 
     await order.update(
       { sequence: Sequelize.literal("sequence - 1") },

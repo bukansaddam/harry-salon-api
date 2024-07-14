@@ -8,7 +8,7 @@ async function createFavorite(req, res) {
   try {
     const userId = await getIdUser(req);
 
-    const newFavorite = await favorite.create({
+    await favorite.create({
       userId,
       hairstyleId,
     });

@@ -16,6 +16,7 @@ var orderRouter = require("../routes/orders");
 var serviceRouter = require("../routes/services");
 var reviewRouter = require("../routes/reviews");
 var favoriteRouter = require("../routes/favorites");
+var orderHistoryRouter = require("../routes/orderHistories");
 
 var app = express();
 
@@ -39,5 +40,6 @@ app.use("/orders", orderRouter);
 app.use("/services", serviceRouter);
 app.use("/reviews", reviewRouter);
 app.use("/favorites", favoriteRouter);
+app.use("/histories/orders", orderHistoryRouter);
 
 module.exports = app;

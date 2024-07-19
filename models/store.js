@@ -26,6 +26,12 @@ module.exports = (sequelize, DataTypes) => {
       Store.hasMany(models.order, {
         foreignKey: "storeId",
       });
+      Store.hasMany(models.presence, {
+        foreignKey: "storeId",
+      });
+      Store.hasMany(models.logPresence, {
+        foreignKey: "storeId",
+      });
     }
   }
 
@@ -68,6 +74,7 @@ module.exports = (sequelize, DataTypes) => {
       isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
+        defaultValue: false,
       },
       ownerId: {
         type: DataTypes.STRING(10),

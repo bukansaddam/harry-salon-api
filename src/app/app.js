@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cors = require("cors");
 
 var indexRouter = require("../routes/index");
 var usersRouter = require("../routes/users");
@@ -17,9 +18,11 @@ var serviceRouter = require("../routes/services");
 var reviewRouter = require("../routes/reviews");
 var favoriteRouter = require("../routes/favorites");
 var orderHistoryRouter = require("../routes/orderHistories");
+var presenceRouter = require("../routes/presence");
 
 var app = express();
 
+app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -41,5 +44,6 @@ app.use("/services", serviceRouter);
 app.use("/reviews", reviewRouter);
 app.use("/favorites", favoriteRouter);
 app.use("/histories/orders", orderHistoryRouter);
+app.use("/presence", presenceRouter);
 
 module.exports = app;

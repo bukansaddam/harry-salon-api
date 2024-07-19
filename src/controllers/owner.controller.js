@@ -7,6 +7,7 @@ generateAccessToken,
   authData,
   clearToken,
 } = require("../middlewares/auth");
+const { getIdUser } = require("../Utils/helper");
 
 async function signUp(req, res) {
   const { name, email, password, phone, address } = req.body;
@@ -169,24 +170,24 @@ async function getOwner(req, res) {
 }
 
 async function getDetailOwner(req, res) {
-  const { id } = req.params;
+  const id = await getIdUser(req);
   try {
     const result = await owner.findOne({ where: { id } });
     if (!result) {
       return res.status(404).json({
         success: false,
-        message: "Owner not found",
+        message: "User not found",
       });
     }
     return res.status(200).json({
       success: true,
-      message: "Owner retrieved successfully",
+      message: "User retrieved successfully",
       data: result,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: id,
+      message: `Error for user with id ${id}: ${error.message}`,
     });
   }
 }

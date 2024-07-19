@@ -3,15 +3,20 @@ const { Model } = require("sequelize");
 const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
-  class Commodity extends Model {
+  class LogPresence extends Model {
     static associate(models) {
-      Commodity.belongsTo(models.store, {
+      LogPresence.belongsTo(models.employee, {
+        foreignKey: "employeeId",
+        as: "employee",
+      });
+      LogPresence.belongsTo(models.store, {
         foreignKey: "storeId",
+        as: "store",
       });
     }
   }
 
-  Commodity.init(
+  LogPresence.init(
     {
       id: {
         type: DataTypes.STRING(10),
@@ -19,30 +24,17 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      image: {
-        type: DataTypes.STRING(),
-        allowNull: false,
-      },
-      name: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      stock: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      category: {
-        type: DataTypes.STRING(50),
+      employeeId: {
+        type: DataTypes.STRING(10),
         allowNull: false,
       },
       storeId: {
         type: DataTypes.STRING(10),
-        allowNull: true,
-      },
-      isDeleted: {
-        type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false,
+      },
+      timeStamp: {
+        type: DataTypes.DATE,
+        allowNull: false,
       },
       createdAt: {
         field: "created_at",
@@ -57,12 +49,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "commodity",
-      tableName: "commodities",
+      modelName: "logPresence",
+      tableName: "log-presences",
     }
   );
 
-  paginate(Commodity);
+  paginate(LogPresence);
 
-  return Commodity;
+  return LogPresence;
 };

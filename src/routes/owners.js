@@ -18,7 +18,7 @@ router.get(
   ownerController.getOwner
 );
 router.get(
-  "/:id",
+  "/detail",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

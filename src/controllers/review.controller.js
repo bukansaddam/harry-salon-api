@@ -1,10 +1,12 @@
 const { review, user, store } = require("../../models/");
 const { Op } = require("sequelize");
+const { getIdUser } = require("../Utils/helper");
 
 async function createReview(req, res) {
-  const { rating, comment, userId, storeId } = req.body;
+  const { rating, comment, storeId } = req.body;
 
   try {
+    const userId = await getIdUser(req);
     const newReview = await review.create({
       rating,
       comment,
@@ -101,6 +103,7 @@ async function getReviewByStore(req, res) {
     const searchTerm = req.query.rating;
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
+    const userId = await getIdUser(req);
 
     let order = [["rating", "DESC"]];
 
@@ -136,6 +139,7 @@ async function getReviewByStore(req, res) {
       data: result.docs.map((review) => {
         return {
           id: review.id,
+          isMe: userId == review.userId,
           avatar: review.user.avatar,
           username: review.user.name,
           rating: review.rating,

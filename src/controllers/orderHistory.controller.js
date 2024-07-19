@@ -179,7 +179,10 @@ async function getOrderHistoryByStore(req, res) {
       };
     } else if (searchDateStart && searchDateEnd) {
       whereClause.createdAt = {
-        [Op.between]: [new Date(searchDateStart), new Date(searchDateEnd)],
+        [Op.and]: [
+          { [Op.gte]: new Date(searchDateStart) },
+          { [Op.lte]: new Date(searchDateEnd) },
+        ],
       };
     } else if (searchDateStart) {
       whereClause.createdAt = {
@@ -195,7 +198,7 @@ async function getOrderHistoryByStore(req, res) {
       {
         model: order,
         as: "order",
-        where: { storeId: storeId, status: "done" || "cancel"},
+        where: { storeId: storeId},
         include: [
           {
             model: store,
@@ -333,7 +336,7 @@ async function getOrderHistoryByUser(req, res) {
       {
         model: order,
         as: "order",
-        where: { userId: userId, status: "done" || "cancel" },
+        where: { userId: userId},
         include: [
           {
             model: store,
@@ -442,7 +445,7 @@ async function getOrderHistoryByEmployee(req, res) {
       {
         model: order,
         as: "order",
-        where: { employeeId: userId, status: "done" || "cancel" },
+        where: { employeeId: userId},
         include: [
           {
             model: store,

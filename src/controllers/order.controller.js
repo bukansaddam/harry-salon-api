@@ -14,6 +14,11 @@ const { Op, where } = require("sequelize");
 const { getIdUser } = require("../Utils/helper");
 const { paginate } = require("sequelize-paginate");
 const cron = require("node-cron");
+const midtransClient = require("midtrans-client");
+const dotenv = require("dotenv");
+const { nanoid } = require("nanoid");
+
+dotenv.config();
 
 async function updateOrderStatusToDelay() {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -64,6 +69,67 @@ async function updateOrderStatusToDelay() {
 }
 
 cron.schedule("* * * * *", updateOrderStatusToDelay);
+
+async function createPaymentLink(req, res) {
+  const { serviceId } = req.body;
+
+  try {
+    const userId = await getIdUser(req);
+    const [userData, serviceData] = await Promise.all([
+      user.findOne({ where: { id: userId } }),
+      service.findOne({ where: { id: serviceId } }),
+    ]);
+
+    if (!userData) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const parameter = {
+      transaction_details: {
+        order_id: nanoid(10),
+        gross_amount: serviceData.price,
+      },
+      item_details: [
+        {
+          id: serviceData.id,
+          price: serviceData.price,
+          quantity: 1,
+          name: serviceData.name,
+        },
+      ],
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        first_name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+      },
+    };
+
+    const snap = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: "SB-Mid-server-v5RyKtwcoXKFjq5lMvuCnBnz",
+    });
+
+    const transactionToken = await snap.createTransaction(parameter);
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment link created successfully",
+      data: transactionToken.redirect_url,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
 
 async function createOrder(req, res) {
   const {
@@ -747,7 +813,15 @@ async function updateOrder(req, res) {
         await orderToUpdate.update({ status }, { transaction: t });
         await orderHistory.create(
           {
-            orderId: orderToUpdate.id
+            orderId: orderToUpdate.id,
+          },
+          { transaction: t }
+        );
+      } else if (status === "cancel") {
+        await orderToUpdate.update({ status }, { transaction: t });
+        await orderHistory.create(
+          {
+            orderId: orderToUpdate.id,
           },
           { transaction: t }
         );
@@ -835,6 +909,7 @@ async function deleteOrder(req, res) {
 }
 
 module.exports = {
+  createPaymentLink,
   createOrder,
   getOrder,
   getOrderEmployee,

@@ -16,6 +16,13 @@ router.post(
   checkBlacklist,
   orderController.createOrder
 );
+router.post(
+  "/payment",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  orderController.createPaymentLink
+);
 router.get(
   "/",
   authenticateToken,

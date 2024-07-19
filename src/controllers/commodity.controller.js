@@ -1,8 +1,9 @@
+const { is } = require("date-fns/locale");
 const { commodity } = require("../../models/");
 const { Op } = require("sequelize");
 
 async function createCommodity(req, res) {
-  const { name, stock, storeId } = req.body;
+  const { name, stock, category, storeId } = req.body;
 
   try {
     const commodityImage = req.file.path;
@@ -10,6 +11,7 @@ async function createCommodity(req, res) {
       image: commodityImage,
       name,
       stock,
+      category,
       storeId,
     });
 
@@ -80,14 +82,21 @@ async function getCommodity(req, res) {
 async function getCommodityByStore(req, res) {
   try {
     const searchTerm = req.query.name;
+    const searchCategory = req.query.category;
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
     let order = [["name", "ASC"]];
 
-    const whereClause = {storeId: req.params.id};
+    const whereClause = {storeId: req.params.id, isDeleted: false};
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
+
+      order = [];
+    }
+
+    if (searchCategory) {
+      whereClause.category = { [Op.like]: `%${searchCategory}%` };
 
       order = [];
     }
@@ -152,7 +161,7 @@ async function getDetailCommodity(req, res) {
 
 async function updateCommodity(req, res) {
   const { id } = req.params;
-  const { name, stock, storeId } = req.body;
+  const { name, stock, category, storeId } = req.body;
 
   try {
     const existingCommodity = await commodity.findOne({ where: { id } });
@@ -165,6 +174,7 @@ async function updateCommodity(req, res) {
 
     if (name) existingCommodity.name = name;
     if (stock) existingCommodity.stock = stock;
+    if (category) existingCommodity.category = category;
     if (storeId) existingCommodity.storeId = storeId;
     if (req.file) existingCommodity.image = req.file.path;
 
@@ -191,8 +201,11 @@ async function deleteCommodity(req, res) {
         success: false,
         message: "Commodity not found",
       });
-    }
-    await existingCommodity.destroy();
+    };
+
+    existingCommodity.isDeleted = true;
+    await existingCommodity.save();
+
     return res.status(200).json({
       success: true,
       message: "Commodity deleted successfully",

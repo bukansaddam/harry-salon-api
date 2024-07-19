@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
       Employee.hasMany(models.order, {
         foreignKey: "employeeId",
       });
+      Employee.hasMany(models.logPresence, {
+        foreignKey: "employeeId",
+      });
+      Employee.hasMany(models.presence, {
+        foreignKey: "employeeId",
+      });
     }
   }
 

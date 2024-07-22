@@ -87,6 +87,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
+      linkPayment: {
+        type: DataTypes.STRING(),
+        allowNull: true,
+      },
       isDeleted: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

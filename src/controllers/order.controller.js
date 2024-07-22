@@ -15,10 +15,98 @@ const { getIdUser } = require("../Utils/helper");
 const { paginate } = require("sequelize-paginate");
 const cron = require("node-cron");
 const midtransClient = require("midtrans-client");
-const dotenv = require("dotenv");
 const { nanoid } = require("nanoid");
+const { se } = require("date-fns/locale");
+const axios = require("axios");
+dotenv = require("dotenv");
 
 dotenv.config();
+
+async function checkPaymentStatus() {
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const fifteenMinutesAgo = new Date(Date.now() - 1 * 60 * 1000);
+
+  console.log("Checking payment status...");
+
+  try {
+    console.log("rererefa");
+    await sequelize.transaction(async (t) => {
+      const ordersToCheck = await order.findAll({
+        where: {
+          status: "unpaid",
+          // date: { [Sequelize.Op.lte]: oneDayAgo },
+        },
+        transaction: t,
+      });
+
+      for (const orderToCheck of ordersToCheck) {
+        const orderId = orderToCheck.id;
+        try {
+          const response = await axios.get(
+            `https://api.sandbox.midtrans.com/v2/${orderId}/status`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Basic ${Buffer.from(
+                  process.env.MIDTRANS_SERVER_KEY
+                ).toString("base64")}`,
+              },
+            }
+          );
+
+          console.log("rerere");
+
+          if (response.status === 200) {
+            const { transaction_status } = response.data;
+            if (transaction_status === "settlement") {
+              const maxSequenceOrder = await order.findOne({
+                order: [["sequence", "DESC"]],
+              });
+
+              const newSequence = maxSequenceOrder
+                ? maxSequenceOrder.sequence + 1
+                : 1;
+
+              await orderToCheck.update(
+                {
+                  status: "pending",
+                  sequence: newSequence,
+                },
+                { transaction: t }
+              );
+            } else if (
+              transaction_status === "pending" &&
+              orderToCheck.updatedAt <= fifteenMinutesAgo
+            ) {
+              await orderToCheck.destroy({ transaction: t });
+            } 
+          }
+          if (
+            response.status === 404 ||
+            orderToCheck.updatedAt <= fifteenMinutesAgo
+          ) {
+            console.log("Order expired:", orderToCheck.id);
+            await orderToCheck.destroy({ transaction: t });
+          }
+        } catch (error) {
+          if (
+            error.response &&
+            error.response.status === 404 &&
+            orderToCheck.date <= oneDayAgo
+          ) {
+            await orderToCheck.destroy({ transaction: t });
+          } else {
+            console.log("Error checking payment status:", error.message);
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.log("Transaction error:", error.message);
+  }
+}
+
+cron.schedule("* * * * *", checkPaymentStatus);
 
 async function updateOrderStatusToDelay() {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
@@ -131,7 +219,7 @@ async function createPaymentLink(req, res) {
   }
 }
 
-async function createOrder(req, res) {
+async function createOrder2(req, res) {
   const {
     storeId,
     serviceId,
@@ -165,6 +253,80 @@ async function createOrder(req, res) {
       success: true,
       message: "Order created successfully",
       data: newOrder,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      sucess: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+async function createOrder(req, res) {
+  const {
+    storeId,
+    serviceId,
+    description,
+    hairstyleId = null,
+    date,
+    employeeId,
+  } = req.body;
+
+  try {
+    const userId = await getIdUser(req);
+    const [userData, serviceData] = await Promise.all([
+      user.findOne({ where: { id: userId } }),
+      service.findOne({ where: { id: serviceId } }),
+    ]);
+
+    const newOrder = await order.create({
+      storeId,
+      employeeId,
+      serviceId,
+      description,
+      userId,
+      hairstyleId: hairstyleId ? hairstyleId : null,
+      date,
+      sequence: 0,
+    });
+
+    const parameter = {
+      transaction_details: {
+        order_id: newOrder.id,
+        gross_amount: serviceData.price,
+      },
+      item_details: [
+        {
+          id: serviceData.id,
+          price: serviceData.price,
+          quantity: 1,
+          name: serviceData.name,
+        },
+      ],
+      credit_card: {
+        secure: true,
+      },
+      customer_details: {
+        first_name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+      },
+    };
+
+    const snap = new midtransClient.Snap({
+      isProduction: false,
+      serverKey: "SB-Mid-server-v5RyKtwcoXKFjq5lMvuCnBnz",
+    });
+
+    const transactionToken = await snap.createTransaction(parameter);
+
+    await newOrder.update({ linkPayment: transactionToken.redirect_url, status: "unpaid" });
+
+    return res.status(200).json({
+      success: true,
+      message: "Order created successfully",
+      data: newOrder.linkPayment,
     });
   } catch (error) {
     console.log(error);
@@ -583,6 +745,7 @@ async function getOrderByService(req, res) {
 
 async function getOrderById(req, res) {
   try {
+    checkPaymentStatus();
     const userId = await getIdUser(req);
 
     const whereClause = { userId: userId, isDeleted: false };
@@ -717,6 +880,7 @@ async function getDetailOrder(req, res) {
     // Membentuk respons
     const response = {
       id: result.id,
+      linkPayment: result.linkPayment,
       orderNumber: result.sequence,
       endTime: updatedTime,
       description: result.description,

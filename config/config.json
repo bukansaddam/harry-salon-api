@@ -1,10 +1,11 @@
 {
   "development": {
-    "username": "root",
-    "password": null,
-    "database": "tugas_akhir",
-    "host": "localhost",
-    "dialect": "mysql"
+    "username": "doadmin",
+    "password": "AVNS_zqRYwkUlQRMvh1uYn-Q ",
+    "database": "defaultdb",
+    "host": "db-mysql-sgp1-36762-do-user-17304722-0.i.db.ondigitalocean.com",
+    "dialect": "mysql",
+    "port": "25060"
   },
   "test": {
     "username": "root",

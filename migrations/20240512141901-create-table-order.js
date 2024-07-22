@@ -88,6 +88,10 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true,
       },
+      linkPayment: {
+        type: Sequelize.STRING(),
+        allowNull: true,
+      },
       isDeleted: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

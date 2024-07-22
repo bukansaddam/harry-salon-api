@@ -6,7 +6,8 @@ dotenv = require("dotenv");
 dotenv.config();
 
 async function createStore(req, res) {
-  const { name, description, location, latitude, longitude, openAt, closeAt } = req.body;
+  const { name, description, location, latitude, longitude, openAt, closeAt } =
+    req.body;
   const token = req.headers.authorization.split(" ")[1];
 
   if (!token) {
@@ -26,7 +27,6 @@ async function createStore(req, res) {
 
     const storeImages = req.files.map((file) => file.path);
 
-    
     const userId = await getIdUser(req);
     console.log(userId);
 
@@ -191,12 +191,17 @@ async function getAllStoreById(req, res) {
 async function getDetailStore(req, res) {
   const { id } = req.params;
   try {
-    const result = await store.findOne({ where: { id }, include: [{
-      model: image,
-      as: "images",
-      attributes: ["image"],
-      where: { storeId: id },
-    }] });
+    const result = await store.findOne({
+      where: { id },
+      include: [
+        {
+          model: image,
+          as: "images",
+          attributes: ["id", "image"],
+          where: { storeId: id },
+        },
+      ],
+    });
     if (!result) {
       return res.status(200).json({
         success: false,
@@ -218,9 +223,26 @@ async function getDetailStore(req, res) {
 
 async function updateStore(req, res) {
   const { id } = req.params;
-  const { name, description, location, openAt, closeAt, status } = req.body;
+  const {
+    name,
+    description,
+    location,
+    latitude,
+    longitude,
+    openAt,
+    closeAt,
+    status,
+    deletedImagesId = "", // Dapatkan sebagai string
+  } = req.body;
 
   try {
+    // Mengubah string yang dipisahkan koma menjadi array
+    const deletedImagesArray = deletedImagesId
+      ? deletedImagesId.split(",")
+      : [];
+
+      console.log('deletedImagesArray', deletedImagesArray);
+
     const existingStore = await store.findOne({ where: { id } });
     if (!existingStore) {
       return res.status(404).json({
@@ -229,16 +251,47 @@ async function updateStore(req, res) {
       });
     }
 
+    // Update store fields
     if (name) existingStore.name = name;
     if (description) existingStore.description = description;
     if (location) existingStore.location = location;
+    if (latitude) existingStore.latitude = latitude;
+    if (longitude) existingStore.longitude = longitude;
     if (openAt) existingStore.openAt = openAt;
     if (closeAt) existingStore.closeAt = closeAt;
     if (status) existingStore.isActive = status;
+
+    // Handle deleted images
+    if (deletedImagesArray.length > 0) {
+      const storeImages = await image.findAll({ where: { storeId: id } });
+
+      if (!storeImages) {
+        return res.status(404).json({
+          success: false,
+          message: "Store images not found",
+        });
+      }
+
+      // Cek jika jumlah deletedImagesArray sama dengan jumlah storeImages
+      // if (deletedImagesArray.length >= storeImages.length) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Cannot delete all images",
+      //   });
+      // }
+
+      console.log(deletedImagesArray);
+
+      // Hapus gambar berdasarkan ID yang diberikan
+      // await image.destroy({ where: { id: deletedImagesArray } });
+      for (let i = 0; i < deletedImagesArray.length; i++) {
+        await image.destroy({ where: { id: deletedImagesArray[i] } });
+      }
+    }
+
+    // Handle new images
     if (req.files && req.files.length > 0) {
       const storeImages = req.files.map((file) => file.path);
-
-      await image.destroy({ where: { storeId: id } });
 
       for (let i = 0; i < storeImages.length; i++) {
         await image.create({
@@ -255,12 +308,15 @@ async function updateStore(req, res) {
       message: "Store updated successfully",
     });
   } catch (error) {
+    console.error(error); // Log error for debugging
     return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
 }
+
+
 
 async function deleteStore(req, res) {
   const { id } = req.params;

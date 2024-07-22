@@ -2,7 +2,7 @@
   "development": {
     "username": "doadmin",
     "password": "AVNS_zqRYwkUlQRMvh1uYn-Q",
-    "database": "defaultdb",
+    "database": "harry_salon_db",
     "host": "db-mysql-sgp1-36762-do-user-17304722-0.i.db.ondigitalocean.com",
     "port": "25060",
     "dialect": "mysql"
@@ -15,10 +15,11 @@
     "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "tugas_akhir",
-    "host": "localhost",
+    "username": "doadmin",
+    "password": "AVNS_zqRYwkUlQRMvh1uYn-Q",
+    "database": "harry_salon_db",
+    "host": "db-mysql-sgp1-36762-do-user-17304722-0.i.db.ondigitalocean.com",
+    "port": "25060",
     "dialect": "mysql"
   }
 }

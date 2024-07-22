@@ -1,11 +1,11 @@
 {
   "development": {
     "username": "doadmin",
-    "password": "AVNS_zqRYwkUlQRMvh1uYn-Q ",
+    "password": "AVNS_zqRYwkUlQRMvh1uYn-Q",
     "database": "defaultdb",
     "host": "db-mysql-sgp1-36762-do-user-17304722-0.i.db.ondigitalocean.com",
-    "dialect": "mysql",
-    "port": "25060"
+    "port": "25060",
+    "dialect": "mysql"
   },
   "test": {
     "username": "root",

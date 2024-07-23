@@ -2,8 +2,10 @@ const { store, image, employee, sequelize } = require("../../models/");
 const { Op, where, Sequelize } = require("sequelize");
 const jwt = require("jsonwebtoken");
 const { getIdUser } = require("../Utils/helper");
-dotenv = require("dotenv");
-dotenv.config();
+const { uploadFileToSpace, deleteFileFromSpace } = require("../middlewares/multer");
+const { config } = require("dotenv");
+
+config();
 
 async function createStore(req, res) {
   const { name, description, location, latitude, longitude, openAt, closeAt } =
@@ -25,8 +27,6 @@ async function createStore(req, res) {
       });
     }
 
-    const storeImages = req.files.map((file) => file.path);
-
     const userId = await getIdUser(req);
     console.log(userId);
 
@@ -42,9 +42,19 @@ async function createStore(req, res) {
       ownerId: userId,
     });
 
-    for (let i = 0; i < storeImages.length; i++) {
+    const uploadedImages = [];
+
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      const fileName = `store-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "stores");
+      uploadedImages.push(uploadResult);
+    }
+
+    for (let i = 0; i < uploadedImages.length; i++) {
       await image.create({
-        image: storeImages[i],
+        image: uploadedImages[i],
         storeId: newStore.id,
       });
     }
@@ -232,16 +242,13 @@ async function updateStore(req, res) {
     openAt,
     closeAt,
     status,
-    deletedImagesId = "", // Dapatkan sebagai string
+    deletedImagesId = "",
   } = req.body;
 
   try {
-    // Mengubah string yang dipisahkan koma menjadi array
     const deletedImagesArray = deletedImagesId
       ? deletedImagesId.split(",")
       : [];
-
-      console.log('deletedImagesArray', deletedImagesArray);
 
     const existingStore = await store.findOne({ where: { id } });
     if (!existingStore) {
@@ -251,7 +258,6 @@ async function updateStore(req, res) {
       });
     }
 
-    // Update store fields
     if (name) existingStore.name = name;
     if (description) existingStore.description = description;
     if (location) existingStore.location = location;
@@ -261,7 +267,6 @@ async function updateStore(req, res) {
     if (closeAt) existingStore.closeAt = closeAt;
     if (status) existingStore.isActive = status;
 
-    // Handle deleted images
     if (deletedImagesArray.length > 0) {
       const storeImages = await image.findAll({ where: { storeId: id } });
 
@@ -272,30 +277,32 @@ async function updateStore(req, res) {
         });
       }
 
-      // Cek jika jumlah deletedImagesArray sama dengan jumlah storeImages
-      // if (deletedImagesArray.length >= storeImages.length) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Cannot delete all images",
-      //   });
-      // }
-
-      console.log(deletedImagesArray);
-
-      // Hapus gambar berdasarkan ID yang diberikan
-      // await image.destroy({ where: { id: deletedImagesArray } });
       for (let i = 0; i < deletedImagesArray.length; i++) {
-        await image.destroy({ where: { id: deletedImagesArray[i] } });
+        const img = await image.findOne({
+          where: { id: deletedImagesArray[i] },
+        });
+        if (img) {
+          const fileKey = img.image.split("/").pop();
+          await deleteFileFromSpace(fileKey, "stores");
+          await img.destroy();
+        }
       }
     }
 
-    // Handle new images
-    if (req.files && req.files.length > 0) {
-      const storeImages = req.files.map((file) => file.path);
+    const uploadedImages = [];
 
-      for (let i = 0; i < storeImages.length; i++) {
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const fileName = `store-${Date.now()}-${file.originalname}`;
+
+        const uploadResult = await uploadFileToSpace(file.buffer, fileName, "stores");
+        uploadedImages.push(uploadResult);
+      }
+
+      for (let i = 0; i < uploadedImages.length; i++) {
         await image.create({
-          image: storeImages[i],
+          image: uploadedImages[i],
           storeId: id,
         });
       }
@@ -308,15 +315,13 @@ async function updateStore(req, res) {
       message: "Store updated successfully",
     });
   } catch (error) {
-    console.error(error); // Log error for debugging
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
 }
-
-
 
 async function deleteStore(req, res) {
   const { id } = req.params;

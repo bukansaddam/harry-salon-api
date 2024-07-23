@@ -218,7 +218,14 @@ async function updateOwner(req, res) {
     }
     if (phone) existingOwner.phone = phone;
     if (address) existingOwner.address = address;
-    if (req.file) existingOwner.avatar = req.file.path;
+    if (req.file) {
+      const file = req.file;
+      const fileName = `avatar-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "avatars");
+
+      existingEmployee.avatar = uploadResult;
+    }
 
     await existingOwner.save();
 

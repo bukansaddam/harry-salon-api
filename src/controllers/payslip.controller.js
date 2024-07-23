@@ -1,6 +1,7 @@
 const { payslip, earning, deduction, employee } = require("../../models/");
 const { Op, where } = require("sequelize");
 const { getIdUser } = require("../Utils/helper");
+const { uploadFileToSpace } = require("../middlewares/multer");
 
 const createPayslip = async (req, res) => {
   const { name, total, employeeId, date, earnings, deductions } = req.body;
@@ -15,7 +16,13 @@ const createPayslip = async (req, res) => {
           message: "Only one attachment is allowed",
         });
       }
-      payslipImage = req.file.path;
+
+      const file = req.file;
+      const fileName = `payslip-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "payslips");
+
+      payslipImage = uploadResult;
     }
 
     const userId = await getIdUser(req);

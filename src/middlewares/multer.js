@@ -1,6 +1,12 @@
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const { PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const s3Client = require("../config/spaces.config");
+const { config } = require("dotenv");
+const { de } = require("date-fns/locale");
+
+config();
 
 const dir = "./uploads";
 
@@ -8,18 +14,10 @@ if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
 }
 
-const multerStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const ext = file.originalname.split(".").pop();
-    cb(null, `${file.fieldname}-${Date.now()}.${ext}`);
-  },
-});
+const storage = multer.memoryStorage();
 
 const upload = multer({
-  storage: multerStorage,
+  storage: storage,
   fileFilter: function (req, file, cb) {
     const allowedTypes = ["jpg", "jpeg", "png"];
     const ext = file.originalname.split(".").pop().toLowerCase();
@@ -38,4 +36,37 @@ const upload = multer({
   },
 });
 
-module.exports = { upload };
+const uploadFileToSpace = async (fileBuffer, fileName, prefix) => {
+  const params = {
+    Bucket: process.env.SPACES_BUCKET,
+    Key: 'images/' + prefix + '/' + fileName,
+    Body: fileBuffer,
+    ACL: "public-read",
+  };
+
+  try {
+    await s3Client.send(new PutObjectCommand(params));
+    const location = `https://${params.Bucket}.${process.env.SPACES_REGION}.digitaloceanspaces.com/${params.Key}`;
+    return location;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to upload file to space");
+  }
+};
+
+const deleteFileFromSpace = async (fileName, prefix) => {
+  const params = {
+    Bucket: process.env.SPACES_BUCKET,
+    Key: "images/" + prefix + "/" + fileName,
+  };
+
+  try {
+    const data = await s3Client.send(new DeleteObjectCommand(params));
+    return data;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to delete file from space");
+  }
+};
+
+module.exports = { upload, uploadFileToSpace, deleteFileFromSpace };

@@ -1,6 +1,12 @@
 const { limit } = require("firebase/firestore");
 const { hairstyle, hairstyleImage } = require("../../models/");
 const { Op } = require("sequelize");
+const s3 = require("../config/spaces.config");
+const fs = require("fs");
+const path = require("path");
+const { uploadFileToSpace, deleteFileFromSpace } = require("../middlewares/multer");
+dotenv = require("dotenv");
+dotenv.config();
 
 async function createHairstyle(req, res) {
   const { name, description } = req.body;
@@ -13,16 +19,24 @@ async function createHairstyle(req, res) {
       });
     }
 
-    const images = req.files.map((file) => file.path);
+    const uploadedImages = [];
+
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      const fileName = `hairstyle-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "hairstyles");
+      uploadedImages.push(uploadResult);
+    }
 
     const newHairstyle = await hairstyle.create({
       name,
       description,
     });
 
-    for (let i = 0; i < images.length; i++) {
+    for (let i = 0; i < uploadedImages.length; i++) {
       await hairstyleImage.create({
-        image: images[i],
+        image: uploadedImages[i],
         hairstyleId: newHairstyle.id,
       });
     }
@@ -30,12 +44,11 @@ async function createHairstyle(req, res) {
     return res.status(200).json({
       success: true,
       message: "Hairstyle created successfully",
-      data: newHairstyle,
     });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      sucess: false,
+      success: false,
       message: "Internal server error",
     });
   }
@@ -154,9 +167,13 @@ async function getDetailHairstyle(req, res) {
 
 async function updateHairstyle(req, res) {
   const { id } = req.params;
-  const { name, description } = req.body;
+  const { name, description, deletedImagesId = "" } = req.body;
 
   try {
+    const deletedImagesArray = deletedImagesId
+      ? deletedImagesId.split(",")
+      : [];
+
     const existingHairstyle = await hairstyle.findOne({ where: { id } });
     if (!existingHairstyle) {
       return res.status(404).json({
@@ -167,7 +184,47 @@ async function updateHairstyle(req, res) {
 
     if (name) existingHairstyle.name = name;
     if (description) existingHairstyle.description = description;
-    if (req.file) existingHairstyle.image = req.file.path;
+
+    if (deletedImagesArray.length > 0) {
+      const hairstyleImages = await hairstyleImage.findAll({ where: { hairstyleId: id } });
+
+      if (!hairstyleImages) {
+        return res.status(404).json({
+          success: false,
+          message: "Hairstyle images not found",
+        });
+      }
+
+      for (let i = 0; i < deletedImagesArray.length; i++) {
+        const img = await hairstyleImage.findOne({
+          where: { id: deletedImagesArray[i] },
+        });
+        if (img) {
+          const fileKey = img.image.split("/").pop();
+          await deleteFileFromSpace(fileKey, "hairstyles");
+          await img.destroy();
+        }
+      }
+    }
+
+    const uploadedImages = [];
+
+    if (req.files && req.files.length > 0) {
+      for (let i = 0; i < req.files.length; i++) {
+        const file = req.files[i];
+        const fileName = `hairstyle-${Date.now()}-${file.originalname}`;
+
+        const uploadResult = await uploadFileToSpace(file.buffer, fileName, "hairstyles");
+        uploadedImages.push(uploadResult);
+      }
+
+      for (let i = 0; i < uploadedImages.length; i++) {
+        await hairstyleImage.create({
+          image: uploadedImages[i],
+          hairstyleId: id,
+        });
+      }
+    }
 
     await existingHairstyle.save();
 

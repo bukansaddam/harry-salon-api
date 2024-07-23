@@ -1,14 +1,26 @@
 const { is } = require("date-fns/locale");
 const { commodity } = require("../../models/");
 const { Op } = require("sequelize");
+const { uploadFileToSpace } = require("../middlewares/multer");
 
 async function createCommodity(req, res) {
   const { name, stock, category, storeId } = req.body;
 
   try {
-    const commodityImage = req.file.path;
+    if (!req.files) {
+      return res.status(400).json({
+        success: false,
+        message: "Image is required",
+      });
+    }
+
+    const file = req.file;
+    const fileName = `commodity-${Date.now()}-${file.originalname}`;
+
+    const uploadResult = await uploadFileToSpace(file.buffer, fileName, "commodities");
+
     const newCommodity = await commodity.create({
-      image: commodityImage,
+      image: uploadResult,
       name,
       stock,
       category,
@@ -18,7 +30,6 @@ async function createCommodity(req, res) {
     return res.status(200).json({
       success: true,
       message: "Commodity created successfully",
-      data: newCommodity,
     });
   } catch (error) {
     console.log(error);
@@ -176,7 +187,18 @@ async function updateCommodity(req, res) {
     if (stock) existingCommodity.stock = stock;
     if (category) existingCommodity.category = category;
     if (storeId) existingCommodity.storeId = storeId;
-    if (req.file) existingCommodity.image = req.file.path;
+    if (req.file) {
+      const file = req.file;
+      const fileName = `commodity-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(
+        file.buffer,
+        fileName,
+        "commodities"
+      );
+
+      existingEmployee.image = uploadResult;
+    }
 
     await existingCommodity.save();
 

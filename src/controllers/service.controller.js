@@ -1,13 +1,25 @@
 const { service } = require("../../models/");
 const { Op } = require("sequelize");
+const { uploadFileToSpace } = require("../middlewares/multer");
 
 async function createService(req, res) {
   const { name, price, duration, storeId } = req.body;
 
   try {
-    const serviceImage = req.file.path;
+    if (!req.files) {
+      return res.status(400).json({
+        success: false,
+        message: "Image is required",
+      });
+    }
+
+    const file = req.file;
+    const fileName = `service-${Date.now()}-${file.originalname}`;
+
+    const uploadResult = await uploadFileToSpace(file.buffer, fileName, "services");
+    
     const newService = await service.create({
-      image: serviceImage,
+      image: uploadResult,
       name,
       price,
       duration,
@@ -168,7 +180,18 @@ async function updateService(req, res) {
     if (price) existingService.price = price;
     if (duration) existingService.duration = duration;
     if (storeId) existingService.storeId = storeId;
-    if (req.file) existingService.image = req.file.path;
+    if (req.file) {
+      const file = req.file;
+      const fileName = `service-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(
+        file.buffer,
+        fileName,
+        "services"
+      );
+
+      existingEmployee.image = uploadResult;
+    }
 
     await existingService.save();
 

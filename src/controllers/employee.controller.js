@@ -9,6 +9,7 @@ const {
   isOwner,
 } = require("../middlewares/auth");
 const { getIdUser } = require("../Utils/helper");
+const { uploadFileToSpace } = require("../middlewares/multer");
 
 async function createEmployee(req, res) {
   const { name, email, password, phone, address, storeId } = req.body;
@@ -47,7 +48,6 @@ async function createEmployee(req, res) {
     return res.status(200).json({
       success: true,
       message: "Employee created successfully",
-      data: newEmployee,
     });
   } catch (error) {
     console.log(error);
@@ -343,7 +343,14 @@ async function updateEmployee(req, res) {
     }
     if (phone) existingEmployee.phone = phone;
     if (address) existingEmployee.address = address;
-    if (req.file) existingEmployee.avatar = req.file.path;
+    if (req.file) {
+      const file = req.file;
+      const fileName = `avatar-${Date.now()}-${file.originalname}`;
+
+      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "avatars");
+
+      existingEmployee.avatar = uploadResult;
+    };
     if (storeId) existingEmployee.storeId = storeId;
 
     await existingEmployee.save();

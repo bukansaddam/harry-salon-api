@@ -28,6 +28,13 @@ router.get(
   employeeController.getEmployeeByOwner
 );
 router.get(
+  "/:id",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  employeeController.getDetailEmployeeByOwner
+);
+router.get(
   "/detail",
   authenticateToken,
   authenticateRefreshToken,

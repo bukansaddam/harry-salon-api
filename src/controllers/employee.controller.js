@@ -19,7 +19,9 @@ async function createEmployee(req, res) {
   const userId = await getIdUser(req);
 
   if (validation.error) {
-    return res.status(400).json({ success: false, message: validation.error.message });
+    return res
+      .status(400)
+      .json({ success: false, message: validation.error.message });
   }
 
   try {
@@ -189,7 +191,7 @@ async function getEmployeeByOwner(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = {createdBy: userId};
+    const whereClause = { createdBy: userId };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -241,7 +243,7 @@ async function getEmployeeByStore(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = { storeId: storeId};
+    const whereClause = { storeId: storeId };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -277,6 +279,39 @@ async function getEmployeeByStore(req, res) {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+async function getDetailEmployeeByOwner(req, res) {
+  const { id } = req.params;
+  try {
+    const result = await employee.findOne({ where: { id } });
+
+    const storeLocation = await store.findOne({
+      where: { id: result.storeId },
+      attributes: ["location"],
+    });
+
+    if (!result) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Employee retrieved successfully",
+      data: {
+        ...result.toJSON(),
+        storeLocation: storeLocation ? storeLocation.location : null,
+      },
+    });
+  } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -347,10 +382,14 @@ async function updateEmployee(req, res) {
       const file = req.file;
       const fileName = `avatar-${Date.now()}-${file.originalname}`;
 
-      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "avatars");
+      const uploadResult = await uploadFileToSpace(
+        file.buffer,
+        fileName,
+        "avatars"
+      );
 
       existingEmployee.avatar = uploadResult;
-    };
+    }
     if (storeId) existingEmployee.storeId = storeId;
 
     await existingEmployee.save();
@@ -398,6 +437,7 @@ module.exports = {
   getEmployeeByOwner,
   getEmployeeByStore,
   getDetailEmployee,
+  getDetailEmployeeByOwner,
   updateEmployee,
   deleteEmployee,
 };

@@ -324,6 +324,8 @@ async function getDetailEmployee(req, res) {
   try {
     const result = await employee.findOne({ where: { id } });
 
+    console.log(result);
+
     const storeLocation = await store.findOne({
       where: { id: result.storeId },
       attributes: ["location"],
@@ -345,7 +347,6 @@ async function getDetailEmployee(req, res) {
       },
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

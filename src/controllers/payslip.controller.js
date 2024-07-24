@@ -209,6 +209,74 @@ async function getPayslipByOwner(req, res) {
   }
 }
 
+async function getPayslipEmployeeByOwner(req, res) {
+  const { id } = req.params;
+  try {
+    const searchTerm = req.query.name;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    let order = [["date", "DESC"]];
+
+    const whereClause = { employeeId: id };
+    if (searchTerm) {
+      whereClause.employeeId = { [Op.like]: `%${searchTerm}%` };
+
+      order = [];
+    }
+
+    const result = await payslip.paginate({
+      page: page,
+      paginate: pageSize,
+      where: whereClause,
+      order: order,
+      include: [
+        {
+          model: employee,
+          attributes: ["avatar", "name"],
+        },
+      ],
+    });
+
+    const response = {
+      total_count: result.total,
+      total_pages: result.pages,
+      data: result.docs.map((payslip) => {
+        const avatar = payslip.employee.avatar;
+        const employeeName = payslip.employee.name;
+        return {
+          id: payslip.id,
+          avatar: avatar,
+          employeeName: employeeName,
+          name: payslip.name,
+          total: payslip.total,
+          createdAt: payslip.date,
+        };
+      }),
+    };
+
+    if (result.docs.length === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "Payslip not found",
+        result: response,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Payslip retrieved successfully",
+      result: response,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
 async function getPayslipByEmployee(req, res) {
   try {
     const searchTerm = req.query.name;
@@ -401,6 +469,7 @@ module.exports = {
   getPayslip,
   getPayslipByOwner,
   getPayslipByEmployee,
+  getPayslipEmployeeByOwner,
   getDetailPayslip,
   deletePayslip,
 };

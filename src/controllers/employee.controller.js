@@ -353,7 +353,7 @@ async function getDetailEmployee(req, res) {
 }
 
 async function updateEmployee(req, res) {
-  const { id } = req.params;
+  const { id } = await getIdUser(req);
   const { name, email, phone, address, storeId } = req.body;
 
   try {

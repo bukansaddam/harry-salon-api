@@ -41,6 +41,13 @@ router.get(
   payslipController.getPayslipByEmployee
 );
 router.get(
+  "/employee/:id",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  payslipController.getPayslipEmployeeByOwner
+);
+router.get(
   "/:id",
   authenticateToken,
   authenticateRefreshToken,

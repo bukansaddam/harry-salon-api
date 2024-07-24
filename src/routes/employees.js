@@ -50,7 +50,7 @@ router.get(
   employeeController.getEmployeeByStore
 );
 router.put(
-  "/:id",
+  "/",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

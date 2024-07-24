@@ -61,7 +61,7 @@ async function createPresence(req, res) {
       });
     }
 
-    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, 'hours').format();
+    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
     // const time = Date.now();
 
     console.log(time);
@@ -82,7 +82,7 @@ async function createPresence(req, res) {
     if (existingPresence) {
       const formattedDate = moment(existingPresence.date).format("YYYY-MM-DD");
       const formattedTime = moment(time).format("YYYY-MM-DD");
-      
+
       if (formattedDate == formattedTime) {
         existingPresence.exitTime = time;
         await existingPresence.save();
@@ -148,9 +148,11 @@ async function getPresenceByUser(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
+    const userId = await getIdUser(req);
+
     let order = [["createdAt", "DESC"]];
 
-    const whereClause = {};
+    const whereClause = { employeeId: userId };
     if (searchTerm) {
       whereClause.date = { [Op.like]: `%${searchTerm}%` };
 
@@ -199,4 +201,68 @@ async function getPresenceByUser(req, res) {
   }
 }
 
-module.exports = { createPresence, createQr, getPresence, getPresenceByUser };
+async function getEmployeePresence(req, res) {
+  const { id } = req.params;
+  try {
+    const searchTerm = req.query.date;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+    let order = [["createdAt", "DESC"]];
+
+    const whereClause = { employeeId: id };
+    if (searchTerm) {
+      whereClause.date = { [Op.like]: `%${searchTerm}%` };
+
+      order = [];
+    }
+
+    const result = await presence.paginate({
+      page: page,
+      paginate: pageSize,
+      where: whereClause,
+      order: order,
+    });
+
+    const response = {
+      total_count: result.total,
+      total_pages: result.pages,
+      data: result.docs.map((presence) => {
+        return {
+          id: presence.id,
+          date: presence.date,
+          entryTime: presence.entryTime,
+          exitTime: presence.exitTime,
+        };
+      }),
+    };
+
+    if (result.docs.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "Presence not found",
+        result: response,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Presence retrieved successfully",
+      result: response,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+module.exports = {
+  createPresence,
+  createQr,
+  getPresence,
+  getPresenceByUser,
+  getEmployeePresence,
+};

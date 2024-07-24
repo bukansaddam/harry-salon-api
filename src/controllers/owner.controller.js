@@ -193,7 +193,7 @@ async function getDetailOwner(req, res) {
 }
 
 async function updateOwner(req, res) {
-  const { id } = req.params;
+  const { id } = await getIdUser(req);
   const { name, email, phone, address } = req.body;
 
   try {

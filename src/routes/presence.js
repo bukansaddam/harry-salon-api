@@ -37,4 +37,12 @@ router.get(
   presenceController.getPresenceByUser
 );
 
+router.get(
+  "/:id",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  presenceController.getEmployeePresence
+);
+
 module.exports = router;

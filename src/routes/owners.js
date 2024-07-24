@@ -25,7 +25,7 @@ router.get(
   ownerController.getDetailOwner
 );
 router.put(
-  "/:id",
+  "/",
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,

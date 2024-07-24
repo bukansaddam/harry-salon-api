@@ -145,6 +145,7 @@ async function getReviewByStore(req, res) {
           rating: review.rating,
           comment: review.comment,
           date: review.date,
+          storeId: review.storeId,
         };
       }),
     };

@@ -23,7 +23,7 @@ module.exports = {
         allowNull: false,
       },
       phone: {
-        type: Sequelize.INTEGER(20),
+        type: Sequelize.BIGINT(),
         allowNull: false,
       },
       address: {

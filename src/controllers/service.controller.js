@@ -29,7 +29,6 @@ async function createService(req, res) {
     return res.status(200).json({
       success: true,
       message: "Service created successfully",
-      data: newService,
     });
   } catch (error) {
     console.log(error);

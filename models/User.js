@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       phone: {
-        type: DataTypes.INTEGER(20),
+        type: DataTypes.BIGINT(),
         allowNull: false,
       },
       address: {
@@ -64,7 +64,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "user",
-      tableName: "users"
+      tableName: "users",
     }
   );
 

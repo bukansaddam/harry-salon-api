@@ -1,8 +1,18 @@
-const { store, image, employee, sequelize } = require("../../models/");
-const { Op, where, Sequelize } = require("sequelize");
+const {
+  store,
+  image,
+  employee,
+  sequelize,
+  service,
+  order,
+} = require("../../models/");
+const { Op, where, Sequelize, fn, literal, col } = require("sequelize");
 const jwt = require("jsonwebtoken");
 const { getIdUser } = require("../Utils/helper");
-const { uploadFileToSpace, deleteFileFromSpace } = require("../middlewares/multer");
+const {
+  uploadFileToSpace,
+  deleteFileFromSpace,
+} = require("../middlewares/multer");
 const { config } = require("dotenv");
 
 config();
@@ -48,7 +58,11 @@ async function createStore(req, res) {
       const file = req.files[i];
       const fileName = `store-${Date.now()}-${file.originalname}`;
 
-      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "stores");
+      const uploadResult = await uploadFileToSpace(
+        file.buffer,
+        fileName,
+        "stores"
+      );
       uploadedImages.push(uploadResult);
     }
 
@@ -80,7 +94,7 @@ async function getStore(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = {};
+    const whereClause = { isActive: true, isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -138,9 +152,9 @@ async function getAllStoreById(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    let order = [["created_at", "ASC"]];
+    let orders = [["created_at", "ASC"]];
 
-    const whereClause = { ownerId: userId };
+    const whereClause = { ownerId: userId, isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
     }
@@ -151,9 +165,15 @@ async function getAllStoreById(req, res) {
         "name",
         "location",
         "isActive",
+        [fn("COUNT", col("employees.id")), "totalEmployees"],
         [
-          sequelize.fn("COUNT", sequelize.col("employees.id")),
-          "totalEmployees",
+          literal(`(
+            SELECT IFNULL(SUM(services.price), 0)
+            FROM orders
+            JOIN services ON orders.serviceId = services.id
+            WHERE orders.storeId = store.id
+          )`),
+          "totalRevenue",
         ],
       ],
       include: [
@@ -162,12 +182,26 @@ async function getAllStoreById(req, res) {
           attributes: [],
           duplicating: false,
         },
+        {
+          model: order,
+          attributes: [],
+          duplicating: false,
+        },
+        {
+          model: service,
+          attributes: [],
+          duplicating: false,
+        },
       ],
       group: ["store.id"],
       page: page,
       paginate: pageSize,
       where: whereClause,
-      order: order,
+      order: orders,
+    });
+
+    result.docs.forEach((store) => {
+      console.log("Store dataValues:", store.dataValues);
     });
 
     const response = {
@@ -296,7 +330,11 @@ async function updateStore(req, res) {
         const file = req.files[i];
         const fileName = `store-${Date.now()}-${file.originalname}`;
 
-        const uploadResult = await uploadFileToSpace(file.buffer, fileName, "stores");
+        const uploadResult = await uploadFileToSpace(
+          file.buffer,
+          fileName,
+          "stores"
+        );
         uploadedImages.push(uploadResult);
       }
 
@@ -333,7 +371,7 @@ async function deleteStore(req, res) {
         message: "Store not found",
       });
     }
-    await existingStore.destroy();
+    await existingStore.update({ isDeleted: true });
     return res.status(200).json({
       success: true,
       message: "Store deleted successfully",

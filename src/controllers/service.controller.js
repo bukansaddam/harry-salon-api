@@ -98,7 +98,7 @@ async function getServiceByStore(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = { storeId: req.params.id };
+    const whereClause = { storeId: req.params.id, isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -217,7 +217,7 @@ async function deleteService(req, res) {
         message: "Service not found",
       });
     }
-    await existingService.destroy();
+    await existingService.update({ isDeleted: true });
     return res.status(200).json({
       success: true,
       message: "Service deleted successfully",

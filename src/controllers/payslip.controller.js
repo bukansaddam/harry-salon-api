@@ -150,7 +150,7 @@ async function getPayslipByOwner(req, res) {
 
     const userId = await getIdUser(req);
 
-    const whereClause = { createdBy: userId };
+    const whereClause = { createdBy: userId, isDeleted: false };
     if (searchTerm) {
       whereClause.employeeId = { [Op.like]: `%${searchTerm}%` };
 
@@ -218,7 +218,7 @@ async function getPayslipEmployeeByOwner(req, res) {
 
     let order = [["date", "DESC"]];
 
-    const whereClause = { employeeId: id };
+    const whereClause = { employeeId: id, isDeleted: false };
     if (searchTerm) {
       whereClause.employeeId = { [Op.like]: `%${searchTerm}%` };
 
@@ -287,7 +287,7 @@ async function getPayslipByEmployee(req, res) {
 
     const userId = await getIdUser(req);
 
-    const whereClause = { employeeId: userId };
+    const whereClause = { employeeId: userId, isDeleted: false };
     if (searchTerm) {
       whereClause.employeeId = { [Op.like]: `%${searchTerm}%` };
 
@@ -451,7 +451,7 @@ async function deletePayslip(req, res) {
         message: "Payslip not found",
       });
     }
-    await existingPayslip.destroy();
+    await existingPayslip.update({ isDeleted: true });
     return res.status(200).json({
       success: true,
       message: "Payslip deleted successfully",

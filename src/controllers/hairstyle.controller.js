@@ -62,7 +62,7 @@ async function getHairstyle(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = {};
+    const whereClause = { isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
       order = [];
@@ -250,7 +250,7 @@ async function deleteHairstyle(req, res) {
         message: "Hairstyle not found",
       });
     }
-    await existingHairstyle.destroy();
+    await existingHairstyle.update({ isDeleted: true });
     return res.status(200).json({
       success: true,
       message: "Hairstyle deleted successfully",

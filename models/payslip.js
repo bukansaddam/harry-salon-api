@@ -49,6 +49,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(10),
         allowNull: false,
       },
+      isDeleted: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       createdAt: {
         field: "created_at",
         type: DataTypes.DATE,

@@ -52,6 +52,11 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "SET NULL",
       },
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: true,
+        defaultValue: false,
+      },
       createdAt: {
         field: "created_at",
         type: Sequelize.DATE,

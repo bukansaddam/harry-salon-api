@@ -29,7 +29,6 @@ async function checkPaymentStatus() {
   console.log("Checking payment status...");
 
   try {
-    console.log("rererefa");
     await sequelize.transaction(async (t) => {
       const ordersToCheck = await order.findAll({
         where: {
@@ -53,8 +52,6 @@ async function checkPaymentStatus() {
               },
             }
           );
-
-          console.log("rerere");
 
           if (response.status === 200) {
             const { transaction_status } = response.data;
@@ -814,6 +811,7 @@ async function getOrderById(req, res) {
 }
 
 async function getDetailOrder(req, res) {
+  checkPaymentStatus();
   const { id } = req.params;
   try {
     // Mengambil data pesanan

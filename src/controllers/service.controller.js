@@ -6,7 +6,7 @@ async function createService(req, res) {
   const { name, price, duration, storeId } = req.body;
 
   try {
-    if (!req.files) {
+    if (!req.file) {
       return res.status(400).json({
         success: false,
         message: "Image is required",

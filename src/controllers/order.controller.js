@@ -24,7 +24,7 @@ dotenv.config();
 
 async function checkPaymentStatus() {
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const fifteenMinutesAgo = new Date(Date.now() - 1 * 60 * 1000);
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 
   console.log("Checking payment status...");
 

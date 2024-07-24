@@ -33,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       phone: {
-        type: DataTypes.INTEGER(15),
+        type: DataTypes.INTEGER(20),
         allowNull: false,
       },
       address: {

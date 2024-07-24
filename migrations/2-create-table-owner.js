@@ -24,7 +24,7 @@ module.exports = {
         allowNull: false,
       },
       phone: {
-        type: Sequelize.INTEGER(15),
+        type: Sequelize.INTEGER(20),
         allowNull: false,
       },
       address: {

@@ -101,6 +101,7 @@ async function checkPaymentStatus() {
   } catch (error) {
     console.log("Transaction error:", error.message);
   }
+  next();
 }
 
 cron.schedule("* * * * *", checkPaymentStatus);
@@ -811,7 +812,6 @@ async function getOrderById(req, res) {
 }
 
 async function getDetailOrder(req, res) {
-  checkPaymentStatus();
   const { id } = req.params;
   try {
     // Mengambil data pesanan
@@ -1081,4 +1081,5 @@ module.exports = {
   getDetailOrder,
   updateOrder,
   deleteOrder,
+  checkPaymentStatus,
 };

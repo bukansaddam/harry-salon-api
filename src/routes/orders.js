@@ -56,6 +56,7 @@ router.get(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
+  orderController.checkPaymentStatus,
   orderController.getDetailOrder
 );
 router.get(

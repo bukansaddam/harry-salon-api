@@ -22,7 +22,7 @@ dotenv = require("dotenv");
 
 dotenv.config();
 
-async function checkPaymentStatus() {
+async function checkPaymentStatus(req, res, next) {
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
 

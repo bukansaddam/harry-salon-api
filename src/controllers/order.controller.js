@@ -288,7 +288,7 @@ async function createOrder(req, res) {
       description,
       userId,
       hairstyleId: hairstyleId ? hairstyleId : null,
-      time,
+      date: time,
       sequence: 0,
       createdAt: time,
     });

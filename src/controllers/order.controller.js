@@ -18,7 +18,7 @@ const midtransClient = require("midtrans-client");
 const { nanoid } = require("nanoid");
 const { se } = require("date-fns/locale");
 const axios = require("axios");
-const { moment } = require("moment-timezone");
+const moment = require("moment-timezone");
 dotenv = require("dotenv");
 
 dotenv.config();

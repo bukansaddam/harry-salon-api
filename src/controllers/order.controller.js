@@ -289,7 +289,7 @@ async function createOrder(req, res) {
       hairstyleId: hairstyleId ? hairstyleId : null,
       time,
       sequence: 0,
-      createdAt: time,
+      created_at: time,
     });
 
     const parameter = {

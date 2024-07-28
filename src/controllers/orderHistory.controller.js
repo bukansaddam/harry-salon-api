@@ -149,7 +149,7 @@ async function getOrderHistoryByStore(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const today = new Date();
+    const today = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();;
     const weekAgo = addDays(today, -7);
 
     const userId = await getIdUser(req);

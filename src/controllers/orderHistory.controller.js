@@ -161,7 +161,10 @@ async function getOrderHistoryByStore(req, res) {
 
     if (searchDateStart && searchDateEnd) {
       whereClauseGraph.createdAt = {
-        [Op.between]: [new Date(searchDateStart), new Date(searchDateEnd)],
+        [Op.and]: [
+          { [Op.gte]: new Date(searchDateStart) },
+          { [Op.lte]: new Date(searchDateEnd) },
+        ],
       };
     } else if (searchDateStart) {
       whereClauseGraph.createdAt = {

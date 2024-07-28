@@ -278,6 +278,8 @@ async function createOrder(req, res) {
       service.findOne({ where: { id: serviceId } }),
     ]);
 
+    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+
     const newOrder = await order.create({
       storeId,
       employeeId,
@@ -285,8 +287,9 @@ async function createOrder(req, res) {
       description,
       userId,
       hairstyleId: hairstyleId ? hairstyleId : null,
-      date,
+      time,
       sequence: 0,
+      createdAt: time,
     });
 
     const parameter = {
@@ -746,7 +749,7 @@ async function getOrderById(req, res) {
     checkPaymentStatus();
     const userId = await getIdUser(req);
 
-    const whereClause = { userId: userId, isDeleted: false };
+    const whereClause = { userId: userId };
 
     const orderData = await order.findOne({
       where: whereClause,

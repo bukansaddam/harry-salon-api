@@ -18,6 +18,7 @@ const midtransClient = require("midtrans-client");
 const { nanoid } = require("nanoid");
 const { se } = require("date-fns/locale");
 const axios = require("axios");
+const { moment } = require("moment-timezone");
 dotenv = require("dotenv");
 
 dotenv.config();
@@ -76,7 +77,7 @@ async function checkPaymentStatus(req, res, next) {
               orderToCheck.updatedAt <= fifteenMinutesAgo
             ) {
               await orderToCheck.destroy({ transaction: t });
-            } 
+            }
           }
           if (
             response.status === 404 ||
@@ -289,7 +290,7 @@ async function createOrder(req, res) {
       hairstyleId: hairstyleId ? hairstyleId : null,
       time,
       sequence: 0,
-      created_at: time,
+      createdAt: time,
     });
 
     const parameter = {
@@ -322,7 +323,10 @@ async function createOrder(req, res) {
 
     const transactionToken = await snap.createTransaction(parameter);
 
-    await newOrder.update({ linkPayment: transactionToken.redirect_url, status: "unpaid" });
+    await newOrder.update({
+      linkPayment: transactionToken.redirect_url,
+      status: "unpaid",
+    });
 
     return res.status(200).json({
       success: true,
@@ -1048,7 +1052,7 @@ async function deleteOrder(req, res) {
 
     const deletedOrderSequence = existingOrder.sequence;
 
-    await existingOrder.update({ isDeleted: true, sequence: 0});
+    await existingOrder.update({ isDeleted: true, sequence: 0 });
 
     await order.update(
       { sequence: Sequelize.literal("sequence - 1") },

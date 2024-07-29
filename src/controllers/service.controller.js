@@ -164,7 +164,7 @@ async function getDetailService(req, res) {
 
 async function updateService(req, res) {
   const { id } = req.params;
-  const { name, price, duration, storeId } = req.body;
+  const { name, price, duration } = req.body;
 
   try {
     const existingService = await service.findOne({ where: { id } });
@@ -178,7 +178,6 @@ async function updateService(req, res) {
     if (name) existingService.name = name;
     if (price) existingService.price = price;
     if (duration) existingService.duration = duration;
-    if (storeId) existingService.storeId = storeId;
     if (req.file) {
       const file = req.file;
       const fileName = `service-${Date.now()}-${file.originalname}`;
@@ -189,7 +188,7 @@ async function updateService(req, res) {
         "services"
       );
 
-      existingEmployee.image = uploadResult;
+      existingService.image = uploadResult;
     }
 
     await existingService.save();
@@ -199,6 +198,7 @@ async function updateService(req, res) {
       message: "Service updated successfully",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

@@ -61,8 +61,8 @@ async function createPresence(req, res) {
       });
     }
 
-    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
-    // const time = Date.now();
+    // const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    const time = Date.now();
 
     console.log(time);
 

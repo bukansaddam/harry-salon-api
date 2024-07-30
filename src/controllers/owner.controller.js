@@ -193,7 +193,7 @@ async function getDetailOwner(req, res) {
 }
 
 async function updateOwner(req, res) {
-  const { id } = await getIdUser(req);
+  const id = await getIdUser(req);
   const { name, email, phone, address } = req.body;
 
   try {
@@ -234,6 +234,7 @@ async function updateOwner(req, res) {
       message: "Owner updated successfully",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

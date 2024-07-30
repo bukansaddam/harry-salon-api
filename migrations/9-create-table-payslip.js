@@ -19,7 +19,7 @@ module.exports = {
         allowNull: true,
       },
       total: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull: false,
       },
       employeeId: {

@@ -99,15 +99,17 @@ async function checkPaymentStatus(req, res, next) {
         }
       }
     });
+
+    next();
   } catch (error) {
     console.log("Transaction error:", error.message);
+    next(error);
   }
-  next();
 }
 
-cron.schedule("* * * * *", checkPaymentStatus);
+// cron.schedule("* * * * *", checkPaymentStatus);
 
-async function updateOrderStatusToDelay() {
+async function updateOrderStatusToDelay(req, res, next) {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
 
   try {
@@ -115,7 +117,7 @@ async function updateOrderStatusToDelay() {
       const ordersToUpdate = await order.findAll({
         where: {
           status: "waiting",
-          date: { [Sequelize.Op.lte]: fiveMinutesAgo },
+          updatedAt: { [Sequelize.Op.lte]: fiveMinutesAgo },
         },
         transaction: t,
       });
@@ -150,12 +152,14 @@ async function updateOrderStatusToDelay() {
     });
 
     console.log("Order sequence and status updated successfully");
+    next();
   } catch (error) {
     console.error("Failed to update order sequence and status:", error);
+    next(error);
   }
 }
 
-cron.schedule("* * * * *", updateOrderStatusToDelay);
+// cron.schedule("* * * * *", updateOrderStatusToDelay);
 
 async function createPaymentLink(req, res) {
   const { serviceId } = req.body;
@@ -279,7 +283,8 @@ async function createOrder(req, res) {
       service.findOne({ where: { id: serviceId } }),
     ]);
 
-    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    // const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    const time = Date.now();
 
     const newOrder = await order.create({
       storeId,
@@ -1089,4 +1094,5 @@ module.exports = {
   updateOrder,
   deleteOrder,
   checkPaymentStatus,
+  updateOrderStatusToDelay,
 };

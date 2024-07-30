@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
         amount: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             allowNull: true,
         },
         payslipId: {

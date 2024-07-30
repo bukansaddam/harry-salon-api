@@ -15,7 +15,7 @@ module.exports = {
         allowNull: true,
       },
       amount: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.BIGINT,
         allowNull: true,
       },
       payslipId: {

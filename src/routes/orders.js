@@ -8,6 +8,7 @@ const {
   checkBlacklist,
   isOwner,
 } = require("../middlewares/auth");
+const { or } = require("sequelize");
 
 router.post(
   "/",
@@ -35,6 +36,8 @@ router.get(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
+  orderController.checkPaymentStatus,
+  orderController.updateOrderStatusToDelay,
   orderController.getOrderEmployee
 );
 router.get(
@@ -42,6 +45,8 @@ router.get(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
+  orderController.checkPaymentStatus,
+  orderController.updateOrderStatusToDelay,
   orderController.getOrderById
 );
 router.get(
@@ -57,6 +62,7 @@ router.get(
   authenticateRefreshToken,
   checkBlacklist,
   orderController.checkPaymentStatus,
+  orderController.updateOrderStatusToDelay,
   orderController.getDetailOrder
 );
 router.get(

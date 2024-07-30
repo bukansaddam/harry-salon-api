@@ -4,7 +4,11 @@
     "password": null,
     "database": "tugas_akhir",
     "host": "localhost",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "dialectOptions": {
+      "useUTC": false
+    },
+    "timezone": "+07:00"
   },
   "test": {
     "username": "root",
@@ -19,6 +23,7 @@
     "database": "harry_salon_db",
     "host": "db-mysql-sgp1-36762-do-user-17304722-0.i.db.ondigitalocean.com",
     "port": "25060",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "timezone": "+07:00"
   }
 }

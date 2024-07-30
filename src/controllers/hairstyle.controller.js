@@ -4,7 +4,10 @@ const { Op } = require("sequelize");
 const s3 = require("../config/spaces.config");
 const fs = require("fs");
 const path = require("path");
-const { uploadFileToSpace, deleteFileFromSpace } = require("../middlewares/multer");
+const {
+  uploadFileToSpace,
+  deleteFileFromSpace,
+} = require("../middlewares/multer");
 dotenv = require("dotenv");
 dotenv.config();
 
@@ -25,7 +28,11 @@ async function createHairstyle(req, res) {
       const file = req.files[i];
       const fileName = `hairstyle-${Date.now()}-${file.originalname}`;
 
-      const uploadResult = await uploadFileToSpace(file.buffer, fileName, "hairstyles");
+      const uploadResult = await uploadFileToSpace(
+        file.buffer,
+        fileName,
+        "hairstyles"
+      );
       uploadedImages.push(uploadResult);
     }
 
@@ -131,7 +138,7 @@ async function getDetailHairstyle(req, res) {
       include: [
         {
           model: hairstyleImage,
-          attributes: ["image"],
+          attributes: ["id", "image"],
           where: { hairstyleId: id },
         },
       ],
@@ -143,7 +150,7 @@ async function getDetailHairstyle(req, res) {
       description: result.description,
       createdAt: result.createdAt,
       updatedAt: result.updatedAt,
-      images: result.hairstyleImages.map((image) => image.image),
+      images: result.hairstyleImages,
     };
 
     if (!result) {
@@ -186,7 +193,9 @@ async function updateHairstyle(req, res) {
     if (description) existingHairstyle.description = description;
 
     if (deletedImagesArray.length > 0) {
-      const hairstyleImages = await hairstyleImage.findAll({ where: { hairstyleId: id } });
+      const hairstyleImages = await hairstyleImage.findAll({
+        where: { hairstyleId: id },
+      });
 
       if (!hairstyleImages) {
         return res.status(404).json({
@@ -214,7 +223,11 @@ async function updateHairstyle(req, res) {
         const file = req.files[i];
         const fileName = `hairstyle-${Date.now()}-${file.originalname}`;
 
-        const uploadResult = await uploadFileToSpace(file.buffer, fileName, "hairstyles");
+        const uploadResult = await uploadFileToSpace(
+          file.buffer,
+          fileName,
+          "hairstyles"
+        );
         uploadedImages.push(uploadResult);
       }
 

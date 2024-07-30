@@ -191,7 +191,7 @@ async function getEmployeeByOwner(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = { createdBy: userId };
+    const whereClause = { createdBy: userId, isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -243,7 +243,7 @@ async function getEmployeeByStore(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = { storeId: storeId };
+    const whereClause = { storeId: storeId, isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -418,12 +418,13 @@ async function deleteEmployee(req, res) {
         message: "Employee not found",
       });
     }
-    await existingEmployee.destroy();
+    await existingEmployee.update({ isDeleted: true });
     return res.status(200).json({
       success: true,
       message: "Employee deleted successfully",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

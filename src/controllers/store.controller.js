@@ -109,8 +109,8 @@ async function getStore(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -165,13 +165,20 @@ async function getAllStoreById(req, res) {
         "name",
         "location",
         "isActive",
-        [fn("COUNT", col("employees.id")), "totalEmployees"],
+        [
+          literal(`(
+            SELECT COUNT(*)
+            FROM employees
+            WHERE employees.storeId = store.id AND employees.isDeleted = false
+          )`),
+          "totalEmployees",
+        ],
         [
           literal(`(
             SELECT IFNULL(SUM(services.price), 0)
             FROM orders
             JOIN services ON orders.serviceId = services.id
-            WHERE orders.storeId = store.id
+            WHERE orders.storeId = store.id AND orders.status = 'done'
           )`),
           "totalRevenue",
         ],
@@ -205,8 +212,8 @@ async function getAllStoreById(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 

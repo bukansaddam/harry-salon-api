@@ -8,6 +8,7 @@ generateAccessToken,
   clearToken,
 } = require("../middlewares/auth");
 const { getIdUser } = require("../Utils/helper");
+const { uploadFileToSpace } = require("../middlewares/multer");
 
 async function signUp(req, res) {
   const { name, email, password, phone, address } = req.body;
@@ -143,8 +144,8 @@ async function getOwner(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -224,7 +225,7 @@ async function updateOwner(req, res) {
 
       const uploadResult = await uploadFileToSpace(file.buffer, fileName, "avatars");
 
-      existingEmployee.avatar = uploadResult;
+      existingOwner.avatar = uploadResult;
     }
 
     await existingOwner.save();

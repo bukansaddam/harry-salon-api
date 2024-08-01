@@ -61,8 +61,8 @@ async function createPresence(req, res) {
       });
     }
 
-    // const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
-    const time = Date.now();
+    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    // const time = Date.now();
 
     console.log(time);
 
@@ -166,9 +166,24 @@ async function getPresenceByUser(req, res) {
       order: order,
     });
 
+    // const response = {
+    //   totalCount: result.total,
+    //   totalPages: result.pages,
+    //   data: result.docs.map((presence) => {
+    //     return {
+    //       id: presence.id,
+    //       date: moment.tz(presence.date, "Asia/Jakarta").format(),
+    //       entryTime: moment.tz(presence.entryTime, "Asia/Jakarta").format(),
+    //       exitTime: presence.exitTime
+    //         ? moment.tz(presence.exitTime, "Asia/Jakarta").format()
+    //         : null,
+    //     };
+    //   }),
+    // };
+
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((presence) => {
         return {
           id: presence.id,
@@ -178,6 +193,8 @@ async function getPresenceByUser(req, res) {
         };
       }),
     };
+
+    console.log(result.docs);
 
     if (result.docs.length === 0) {
       return res.status(200).json({
@@ -225,8 +242,8 @@ async function getEmployeePresence(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      toPl_pages: result.pages,
       data: result.docs.map((presence) => {
         return {
           id: presence.id,

@@ -8,6 +8,7 @@ const bcrypt = require("bcrypt");
 const { validateUser } = require("../validators/validator");
 const { Op } = require("sequelize");
 const { getIdUser } = require("../Utils/helper");
+const { uploadFileToSpace } = require("../middlewares/multer");
 
 async function signUp(req, res) {
   const { name, email, password, phone, address } = req.body;
@@ -142,8 +143,8 @@ async function getUser(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -159,7 +160,6 @@ async function getUser(req, res) {
       message: "User retrieved successfully",
       result: response,
     });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -185,11 +185,11 @@ async function getDetailUser(req, res) {
       data: result,
     });
   } catch (error) {
-  return res.status(500).json({
-    success: false,
-    message: `Error for user with id ${id}: ${error.message}`,
-  });
-}
+    return res.status(500).json({
+      success: false,
+      message: `Error for user with id ${id}: ${error.message}`,
+    });
+  }
 }
 
 async function updateUser(req, res) {
@@ -218,7 +218,12 @@ async function updateUser(req, res) {
     }
     if (phone) existingUser.phone = phone;
     if (address) existingUser.address = address;
-    if (req.file) existingUser.avatar = req.file.path;
+    if (req.file) {
+      const file = req.file;
+      const fileName = `avatar-${Date.now()}-${file.originalname}`;
+      const fileUrl = await uploadFileToSpace(file.buffer, fileName, "avatars");
+      existingUser.avatar = fileUrl;
+    }
 
     await existingUser.save();
 

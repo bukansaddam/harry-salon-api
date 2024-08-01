@@ -283,8 +283,8 @@ async function createOrder(req, res) {
       service.findOne({ where: { id: serviceId } }),
     ]);
 
-    // const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
-    const time = Date.now();
+    const time = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    // const time = Date.now();
 
     const newOrder = await order.create({
       storeId,
@@ -511,8 +511,8 @@ async function getOrder(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: dataWithOrderNumber,
     };
 
@@ -624,8 +624,8 @@ async function getOrderEmployee(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: dataWithOrderNumber,
     };
 
@@ -734,8 +734,8 @@ async function getOrderByService(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: dataWithOrderNumber,
     };
 

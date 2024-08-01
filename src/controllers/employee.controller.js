@@ -154,8 +154,8 @@ async function getEmployee(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -207,8 +207,8 @@ async function getEmployeeByOwner(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -259,8 +259,8 @@ async function getEmployeeByStore(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -355,7 +355,7 @@ async function getDetailEmployee(req, res) {
 }
 
 async function updateEmployee(req, res) {
-  const { id } = await getIdUser(req);
+  const id = await getIdUser(req);
   const { name, email, phone, address, storeId } = req.body;
 
   try {
@@ -401,6 +401,7 @@ async function updateEmployee(req, res) {
       message: "Employee updated successfully",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

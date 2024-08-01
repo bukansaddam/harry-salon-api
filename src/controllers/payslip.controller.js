@@ -114,8 +114,8 @@ async function getPayslip(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -171,8 +171,8 @@ async function getPayslipByOwner(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((payslip) => {
         const avatar = payslip.employee.avatar;
         const employeeName = payslip.employee.name;
@@ -239,8 +239,8 @@ async function getPayslipEmployeeByOwner(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((payslip) => {
         const avatar = payslip.employee.avatar;
         const employeeName = payslip.employee.name;
@@ -308,8 +308,8 @@ async function getPayslipByEmployee(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((payslip) => {
         const avatar = payslip.employee.avatar;
         const employeeName = payslip.employee.name;

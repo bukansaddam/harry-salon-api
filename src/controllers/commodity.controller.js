@@ -7,7 +7,7 @@ async function createCommodity(req, res) {
   const { name, stock, category, storeId } = req.body;
 
   try {
-    if (!req.files) {
+    if (!req.file) {
       return res.status(400).json({
         success: false,
         message: "Image is required",
@@ -63,8 +63,8 @@ async function getCommodity(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -120,8 +120,8 @@ async function getCommodityByStore(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs,
     };
 
@@ -225,7 +225,7 @@ async function deleteCommodity(req, res) {
       });
     };
 
-    existingCommodity.isDeleted = true;
+    existingCommodity.update({ isDeleted: true });
     await existingCommodity.save();
 
     return res.status(200).json({

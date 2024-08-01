@@ -64,8 +64,8 @@ async function getFavorite(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((favorite) => {
         const firstImage =
           favorite.hairstyle.hairstyleImages.length > 0

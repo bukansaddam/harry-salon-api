@@ -17,7 +17,6 @@ async function createOrderHistory(req, res) {
   const { orderId } = req.body;
 
   try {
-
     await orderHistory.create({
       orderId,
     });
@@ -150,8 +149,8 @@ async function getOrderHistoryByStore(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const today = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();;
-    const weekAgo = addDays(today, -7);
+    const today = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    const weekAgo = addDays(new Date(today), -7);
 
     const userId = await getIdUser(req);
 
@@ -202,7 +201,7 @@ async function getOrderHistoryByStore(req, res) {
       {
         model: order,
         as: "order",
-        where: { storeId: storeId},
+        where: { storeId: storeId },
         include: [
           {
             model: store,
@@ -254,23 +253,27 @@ async function getOrderHistoryByStore(req, res) {
     for (let i = 0; i < 7; i++) {
       const date = format(
         addDays(searchDateStart ? new Date(searchDateStart) : weekAgo, i),
-        "dd"
+        "yyyy-MM-dd"
       );
-      orderCountByDay[date] = 0;
+      orderCountByDay[date] = {
+        fullDate: date,
+        dayOfMonth: format(new Date(date), "dd"),
+        count: 0,
+      };
     }
 
     graph.forEach((order) => {
-      const daysOfWeek = format(
-        new Date(order.createdAt).toISOString().split("T")[0],
-        "dd"
-      );
-      orderCountByDay[daysOfWeek]++;
+      const fullDate = format(new Date(order.createdAt), "yyyy-MM-dd");
+      orderCountByDay[fullDate].count++;
     });
 
     const sortedOrderCountByDay = Object.keys(orderCountByDay)
       .sort()
-      .map((date) => {
-        return { date: date, count: orderCountByDay[date] };
+      .map((fullDate) => {
+        return {
+          date: orderCountByDay[fullDate].dayOfMonth,
+          count: orderCountByDay[fullDate].count,
+        };
       });
 
     const response = {
@@ -340,7 +343,7 @@ async function getOrderHistoryByUser(req, res) {
       {
         model: order,
         as: "order",
-        where: { userId: userId},
+        where: { userId: userId },
         include: [
           {
             model: store,
@@ -395,7 +398,7 @@ async function getOrderHistoryByUser(req, res) {
           orderDate: item.order.date,
           orderDescription: item.order.description,
           status: item.order.status,
-        }
+        };
       }),
     };
 
@@ -449,7 +452,7 @@ async function getOrderHistoryByEmployee(req, res) {
       {
         model: order,
         as: "order",
-        where: { employeeId: userId},
+        where: { employeeId: userId },
         include: [
           {
             model: store,
@@ -492,8 +495,8 @@ async function getOrderHistoryByEmployee(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       graph: [],
       data: result.docs.map((item) => {
         return {

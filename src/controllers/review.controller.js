@@ -18,7 +18,6 @@ async function createReview(req, res) {
     return res.status(200).json({
       success: true,
       message: "Review created successfully",
-      data: newReview,
     });
   } catch (error) {
     console.log(error);
@@ -61,8 +60,8 @@ async function getReview(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((review) => {
         return {
           id: review.id,
@@ -134,8 +133,8 @@ async function getReviewByStore(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((review) => {
         return {
           id: review.id,

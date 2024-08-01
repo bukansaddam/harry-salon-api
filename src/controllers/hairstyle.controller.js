@@ -92,8 +92,8 @@ async function getHairstyle(req, res) {
     });
 
     const response = {
-      total_count: result.total,
-      total_pages: result.pages,
+      totalCount: result.total,
+      totalPages: result.pages,
       data: result.docs.map((hairstyle) => {
         const firstImage =
           hairstyle.hairstyleImages.length > 0

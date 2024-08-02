@@ -284,6 +284,7 @@ async function getOrderHistoryByStore(req, res) {
         return {
           id: item.id,
           orderId: item.orderId,
+          storeId: item.order.storeId,
           serviceName: item.order.service.name,
           servicePrice: item.order.service.price,
           orderDate: item.order.date,

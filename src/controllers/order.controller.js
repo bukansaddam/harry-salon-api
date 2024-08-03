@@ -992,7 +992,7 @@ async function updateOrder(req, res) {
           { transaction: t }
         );
       } else if (status === "cancel") {
-        await orderToUpdate.update({ status }, { transaction: t });
+        await orderToUpdate.update({ status, sequence: 0 }, { transaction: t });
         await orderHistory.create(
           {
             orderId: orderToUpdate.id,

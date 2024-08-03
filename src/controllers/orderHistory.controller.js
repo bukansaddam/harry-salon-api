@@ -394,6 +394,7 @@ async function getOrderHistoryByUser(req, res) {
         return {
           id: item.id,
           orderId: item.orderId,
+          storeId: item.order.storeId,
           serviceName: item.order.service.name,
           servicePrice: item.order.service.price,
           orderDate: item.order.date,
@@ -503,6 +504,7 @@ async function getOrderHistoryByEmployee(req, res) {
         return {
           id: item.id,
           orderId: item.orderId,
+          storeId: item.order.storeId,
           serviceName: item.order.service.name,
           servicePrice: item.order.service.price,
           orderDate: item.order.date,

@@ -197,7 +197,7 @@ async function updateCommodity(req, res) {
         "commodities"
       );
 
-      existingEmployee.image = uploadResult;
+      existingCommodity.image = uploadResult;
     }
 
     await existingCommodity.save();

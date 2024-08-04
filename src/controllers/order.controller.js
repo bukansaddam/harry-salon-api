@@ -536,7 +536,7 @@ async function getOrderEmployee(req, res) {
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
     const employeeId = await getIdUser(req);
 
-    const employee = await employee.findOne({
+    const employeeData = await employee.findOne({
       where: { id: employeeId, isDeleted: false },
     });
 
@@ -554,7 +554,7 @@ async function getOrderEmployee(req, res) {
     const employeeStoreIds = employeeOrders.map((order) => order.storeId);
 
     const whereClause = {
-      storeId: employee.storeId,
+      storeId: employeeData.storeId,
       isDeleted: false,
     };
 

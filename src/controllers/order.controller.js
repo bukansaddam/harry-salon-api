@@ -757,8 +757,11 @@ async function getOrderById(req, res) {
   try {
     checkPaymentStatus();
     const userId = await getIdUser(req);
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const storeIdUser = decoded.storeId;
 
-    const whereClause = { userId: userId };
+    const whereClause = { userId: userId, storeId: storeIdUser };
 
     const orderData = await order.findOne({
       where: whereClause,

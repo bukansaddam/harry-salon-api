@@ -41,6 +41,7 @@ module.exports = {
       isActive: {
         type: Sequelize.BOOLEAN,
         allowNull: true,
+        defaultValue: false,
       },
       ownerId: {
         type: Sequelize.STRING(10),

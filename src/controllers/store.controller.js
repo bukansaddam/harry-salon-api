@@ -48,7 +48,6 @@ async function createStore(req, res) {
       longitude,
       openAt,
       closeAt,
-      isActive: true,
       ownerId: userId,
     });
 

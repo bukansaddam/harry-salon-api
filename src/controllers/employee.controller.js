@@ -61,7 +61,7 @@ async function createEmployee(req, res) {
 }
 
 async function signIn(req, res) {
-  const { email, password } = req.body;
+  const { email, password, deviceToken } = req.body;
 
   try {
     const existingEmployee = await employee.findOne({ where: { email } });
@@ -85,6 +85,8 @@ async function signIn(req, res) {
     const accessToken = generateAccessToken(existingEmployee);
 
     const storeId = existingEmployee.storeId;
+
+    existingEmployee.update({ deviceToken });
 
     return res.status(200).json({
       success: true,
@@ -354,6 +356,36 @@ async function getDetailEmployee(req, res) {
   }
 }
 
+async function changeStore(req, res) {
+  const { id } = req.params;
+  const { storeId } = req.body;
+
+  try {
+    const existingEmployee = await employee.findOne({ where: { id } });
+    if (!existingEmployee) {
+      return res.status(404).json({
+        success: false,
+        message: "Employee not found",
+      });
+    }
+
+    existingEmployee.storeId = storeId;
+
+    await existingEmployee.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Employee updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
 async function updateEmployee(req, res) {
   const id = await getIdUser(req);
   const { name, email, phone, address, storeId } = req.body;
@@ -443,5 +475,6 @@ module.exports = {
   getDetailEmployee,
   getDetailEmployeeByOwner,
   updateEmployee,
+  changeStore,
   deleteEmployee,
 };

@@ -1,7 +1,13 @@
 const { is } = require("date-fns/locale");
-const { commodity } = require("../../models/");
+const {
+  commodity,
+  commodityHistory,
+  employee,
+  owner,
+} = require("../../models/");
 const { Op } = require("sequelize");
 const { uploadFileToSpace } = require("../middlewares/multer");
+const { getIdUser } = require("../Utils/helper");
 
 async function createCommodity(req, res) {
   const { name, stock, category, storeId } = req.body;
@@ -17,7 +23,11 @@ async function createCommodity(req, res) {
     const file = req.file;
     const fileName = `commodity-${Date.now()}-${file.originalname}`;
 
-    const uploadResult = await uploadFileToSpace(file.buffer, fileName, "commodities");
+    const uploadResult = await uploadFileToSpace(
+      file.buffer,
+      fileName,
+      "commodities"
+    );
 
     const newCommodity = await commodity.create({
       image: uploadResult,
@@ -99,7 +109,7 @@ async function getCommodityByStore(req, res) {
 
     let order = [["name", "ASC"]];
 
-    const whereClause = {storeId: req.params.id, isDeleted: false};
+    const whereClause = { storeId: req.params.id, isDeleted: false };
     if (searchTerm) {
       whereClause.name = { [Op.like]: `%${searchTerm}%` };
 
@@ -175,6 +185,7 @@ async function updateCommodity(req, res) {
   const { name, stock, category, storeId } = req.body;
 
   try {
+    const userId = await getIdUser(req);
     const existingCommodity = await commodity.findOne({ where: { id } });
     if (!existingCommodity) {
       return res.status(404).json({
@@ -183,10 +194,55 @@ async function updateCommodity(req, res) {
       });
     }
 
-    if (name) existingCommodity.name = name;
-    if (stock) existingCommodity.stock = stock;
-    if (category) existingCommodity.category = category;
+    let username;
+    let userRole;
+
+    username = await owner.findOne({ where: { id: userId } });
+    if (username) {
+      userRole = "owner";
+    } else {
+      username = await employee.findOne({ where: { id: userId } });
+      if (username) {
+        userRole = "employee";
+      }
+    }
+
+    if (!username) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (name && name !== existingCommodity.name) {
+      await commodityHistory.create({
+        commodityId: existingCommodity.id,
+        description: `${username.name} (as ${userRole}) changed name from ${existingCommodity.name} to ${name}`,
+        createdBy: userId,
+      });
+      existingCommodity.name = name;
+    }
+
+    if (stock && stock !== existingCommodity.stock) {
+      await commodityHistory.create({
+        commodityId: existingCommodity.id,
+        description: `${username.name} (as ${userRole}) changed stock from ${existingCommodity.stock} to ${stock}`,
+        createdBy: userId,
+      });
+      existingCommodity.stock = stock;
+    }
+
+    if (category && category !== existingCommodity.category) {
+      await commodityHistory.create({
+        commodityId: existingCommodity.id,
+        description: `${username.name} (as ${userRole}) changed category from ${existingCommodity.category} to ${category}`,
+        createdBy: userId,
+      });
+      existingCommodity.category = category;
+    }
+
     if (storeId) existingCommodity.storeId = storeId;
+
     if (req.file) {
       const file = req.file;
       const fileName = `commodity-${Date.now()}-${file.originalname}`;
@@ -196,6 +252,12 @@ async function updateCommodity(req, res) {
         fileName,
         "commodities"
       );
+
+      commodityHistory.create({
+        commodityId: existingCommodity.id,
+        description: `${username.name} changed image`,
+        createdBy: userId,
+      });
 
       existingCommodity.image = uploadResult;
     }
@@ -207,6 +269,7 @@ async function updateCommodity(req, res) {
       message: "Commodity updated successfully",
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -223,7 +286,7 @@ async function deleteCommodity(req, res) {
         success: false,
         message: "Commodity not found",
       });
-    };
+    }
 
     existingCommodity.update({ isDeleted: true });
     await existingCommodity.save();

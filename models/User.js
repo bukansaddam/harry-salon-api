@@ -50,6 +50,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(),
         allowNull: true,
       },
+      deviceToken: {
+        type: DataTypes.STRING(),
+        allowNull: true,
+      },
       createdAt: {
         field: "created_at",
         type: DataTypes.DATE,

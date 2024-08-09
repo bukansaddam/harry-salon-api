@@ -20,6 +20,7 @@ const { se } = require("date-fns/locale");
 const axios = require("axios");
 const moment = require("moment-timezone");
 dotenv = require("dotenv");
+const admin = require("../config/firebase.config");
 
 dotenv.config();
 
@@ -54,10 +55,32 @@ async function checkPaymentStatus(req, res, next) {
             }
           );
 
+          const employeeTokens = await employee.findAll({
+            where: { storeId: orderToCheck.storeId },
+          });
+
+          const registrationToken = employeeTokens.map(
+            (employee) => employee.deviceToken
+          );
+
+          console.log("Registration Token: ", registrationToken);
+
+          const message = {
+            notification: {
+              title: "New Order",
+              body: "You have a new order!",
+            },
+            data: {
+              id: orderId,
+            },
+            tokens: registrationToken,
+          };
+
           if (response.status === 200) {
             const { transaction_status } = response.data;
             if (transaction_status === "settlement") {
               const maxSequenceOrder = await order.findOne({
+                where: { storeId: orderToCheck.storeId },
                 order: [["sequence", "DESC"]],
               });
 
@@ -65,13 +88,25 @@ async function checkPaymentStatus(req, res, next) {
                 ? maxSequenceOrder.sequence + 1
                 : 1;
 
-              await orderToCheck.update(
-                {
-                  status: "pending",
-                  sequence: newSequence,
-                },
-                { transaction: t }
-              );
+              await orderToCheck
+                .update(
+                  {
+                    status: "pending",
+                    sequence: newSequence,
+                  },
+                  { transaction: t }
+                )
+                .then(() => {
+                  admin
+                    .messaging()
+                    .sendEachForMulticast(message)
+                    .then((response) => {
+                      console.log("Successfully sent message:", response);
+                    })
+                    .catch((error) => {
+                      console.log("Error sending message:", error);
+                    });
+                });
             } else if (
               transaction_status === "pending" &&
               orderToCheck.updatedAt <= fifteenMinutesAgo
@@ -969,19 +1004,111 @@ async function updateOrder(req, res) {
               },
               { transaction: t }
             ),
-            nextOrder.update({ sequence: currentSequence }, { transaction: t }),
+            nextOrder
+              .update({ sequence: currentSequence }, { transaction: t })
+              .then(async () => {
+                const userDevice = await user.findOne({
+                  where: { id: nextOrder.userId },
+                  transaction: t,
+                });
+
+                const registrationToken = userDevice.deviceToken;
+
+                const message = {
+                  notification: {
+                    title: "Now is your turn",
+                    body: `Hello ${userDevice.name}, now is your turn`,
+                  },
+                  data: {
+                    id: nextOrder.id,
+                  },
+                  token: registrationToken,
+                };
+
+                admin
+                  .messaging()
+                  .send(message)
+                  .then((response) => {
+                    console.log("Successfully sent message:", response);
+                  })
+                  .catch((error) => {
+                    console.log("Error sending message:", error);
+                  });
+              }),
           ]);
         } else {
-          await orderToUpdate.update(
-            { status: "pending", isAccepted: false, employeeId: null },
-            { transaction: t }
-          );
+          await orderToUpdate
+            .update(
+              { status: "pending", isAccepted: false, employeeId: null },
+              { transaction: t }
+            )
+            .then(async () => {
+              const userDevice = await user.findOne({
+                where: { id: orderToUpdate.userId },
+                transaction: t,
+              });
+
+              const registrationToken = userDevice.deviceToken;
+
+              const message = {
+                notification: {
+                  title: "Now is your turn",
+                  body: `Hello ${userDevice.name}, now is your turn`,
+                },
+                data: {
+                  id: orderToUpdate.id,
+                },
+                token: registrationToken,
+              };
+
+              admin
+                .messaging()
+                .send(message)
+                .then((response) => {
+                  console.log("Successfully sent message:", response);
+                })
+                .catch((error) => {
+                  console.log("Error sending message:", error);
+                });
+            });
         }
       } else if (isAccepted) {
-        await orderToUpdate.update(
-          { isAccepted: isAccepted, status: "waiting", employeeId: userId },
-          { transaction: t }
-        );
+        await orderToUpdate
+          .update(
+            { isAccepted: isAccepted, status: "waiting", employeeId: userId },
+            { transaction: t }
+          )
+          .then(async () => {
+            const userDevice = await user.findOne({
+              where: { id: orderToUpdate.userId },
+              transaction: t,
+            });
+
+            const registrationToken = userDevice.deviceToken;
+
+            console.log("Registration token:", registrationToken);
+
+            const message = {
+              notification: {
+                title: "Order Accepted",
+                body: `Hello ${userDevice.name}, your order has been accepted. Please come to the store immediately`,
+              },
+              data: {
+                id: orderToUpdate.id,
+              },
+              token: registrationToken,
+            };
+
+            admin
+              .messaging()
+              .send(message)
+              .then((response) => {
+                console.log("Successfully sent message:", response);
+              })
+              .catch((error) => {
+                console.log("Error sending message:", error);
+              });
+          });
       } else if (isOnLocation) {
         await orderToUpdate.update(
           { isOnLocation: isOnLocation },
@@ -989,20 +1116,80 @@ async function updateOrder(req, res) {
         );
       } else if (status === "done") {
         await orderToUpdate.update({ status }, { transaction: t });
-        await orderHistory.create(
-          {
-            orderId: orderToUpdate.id,
-          },
-          { transaction: t }
-        );
+        await orderHistory
+          .create(
+            {
+              orderId: orderToUpdate.id,
+            },
+            { transaction: t }
+          )
+          .then(async () => {
+            const userDevice = await user.findOne({
+              where: { id: orderToUpdate.userId },
+              transaction: t,
+            });
+
+            const registrationToken = userDevice.deviceToken;
+
+            const message = {
+              notification: {
+                title: "Order Done",
+                body: `Hello ${userDevice.name}, your order has been done. Thank you!`,
+              },
+              data: {
+                id: orderToUpdate.id,
+              },
+              token: registrationToken,
+            };
+
+            admin
+              .messaging()
+              .send(message)
+              .then((response) => {
+                console.log("Successfully sent message:", response);
+              })
+              .catch((error) => {
+                console.log("Error sending message:", error);
+              });
+          });
       } else if (status === "cancel") {
         await orderToUpdate.update({ status, sequence: 0 }, { transaction: t });
-        await orderHistory.create(
-          {
-            orderId: orderToUpdate.id,
-          },
-          { transaction: t }
-        );
+        await orderHistory
+          .create(
+            {
+              orderId: orderToUpdate.id,
+            },
+            { transaction: t }
+          )
+          .then(async () => {
+            const userDevice = await user.findOne({
+              where: { id: orderToUpdate.userId },
+              transaction: t,
+            });
+
+            const registrationToken = userDevice.deviceToken;
+
+            const message = {
+              notification: {
+                title: "Order Cancelled",
+                body: `Hello ${userDevice.name}, your order has been cancelled`,
+              },
+              data: {
+                id: orderToUpdate.id,
+              },
+              token: registrationToken,
+            };
+
+            admin
+              .messaging()
+              .send(message)
+              .then((response) => {
+                console.log("Successfully sent message:", response);
+              })
+              .catch((error) => {
+                console.log("Error sending message:", error);
+              });
+          });
       } else {
         await orderToUpdate.update(
           {
@@ -1031,7 +1218,63 @@ async function updateOrder(req, res) {
         await orderToUpdate.update(
           { status: "onProcess", sequence: 0 },
           { transaction: t }
-        );
+        ).then(async () => {
+          const userDevice = await user.findOne({
+            where: { id: orderToUpdate.userId },
+            transaction: t,
+          });
+
+          const registrationToken = userDevice.deviceToken;
+
+          const message = {
+            notification: {
+              title: "Order On Process",
+              body: `Hello ${userDevice.name}, your order is being processed`,
+            },
+            data: {
+              id: orderToUpdate.id,
+            },
+            token: registrationToken,
+          };
+
+          admin
+            .messaging()
+            .send(message)
+            .then((response) => {
+              console.log("Successfully sent message:", response);
+            })
+            .catch((error) => {
+              console.log("Error sending message:", error);
+            });
+
+          const employeeDevice = await employee.findOne({
+            where: { id: orderToUpdate.employeeId },
+            transaction: t,
+          });
+
+          const employeeRegistrationToken = employeeDevice.deviceToken;
+
+          const employeeMessage = {
+            notification: {
+              title: "Order On Process",
+              body: `Hello ${employeeDevice.name}, your customer already on the store.`,
+            },
+            data: {
+              id: orderToUpdate.id,
+            },
+            token: employeeRegistrationToken,
+          };
+
+          admin
+            .messaging()
+            .send(employeeMessage)
+            .then((response) => {
+              console.log("Successfully sent message:", response);
+            })
+            .catch((error) => {
+              console.log("Error sending message:", error);
+            });
+        });
       }
 
       return res.status(200).json({

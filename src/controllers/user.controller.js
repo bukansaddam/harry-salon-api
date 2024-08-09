@@ -53,7 +53,7 @@ async function signUp(req, res) {
 }
 
 async function signIn(req, res) {
-  const { email, password } = req.body;
+  const { email, password, deviceToken } = req.body;
 
   try {
     const existingUser = await user.findOne({ where: { email } });
@@ -75,6 +75,8 @@ async function signIn(req, res) {
     }
 
     const accessToken = generateAccessToken(existingUser);
+
+    await existingUser.update({ deviceToken });
 
     return res.status(200).json({
       success: true,

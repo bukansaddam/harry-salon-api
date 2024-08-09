@@ -3,18 +3,16 @@ const { Model } = require("sequelize");
 const { paginate } = require("sequelize-paginate");
 
 module.exports = (sequelize, DataTypes) => {
-  class Commodity extends Model {
+  class CommodityHistory extends Model {
     static associate(models) {
-      Commodity.belongsTo(models.store, {
-        foreignKey: "storeId",
-      });
-      Commodity.hasMany(models.commodityHistory, {
+      CommodityHistory.belongsTo(models.commodity, {
         foreignKey: "commodityId",
+        as: "commodity",
       });
     }
   }
 
-  Commodity.init(
+  CommodityHistory.init(
     {
       id: {
         type: DataTypes.STRING(10),
@@ -22,30 +20,17 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: () => nanoid(10),
       },
-      image: {
-        type: DataTypes.STRING(),
-        allowNull: false,
-      },
-      name: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-      },
-      stock: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      category: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-      },
-      storeId: {
+      commodityId: {
         type: DataTypes.STRING(10),
-        allowNull: true,
-      },
-      isDeleted: {
-        type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: false,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
+      createdBy: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
       },
       createdAt: {
         field: "created_at",
@@ -60,12 +45,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "commodity",
-      tableName: "commodities",
+      modelName: "commodityHistory",
+      tableName: "commodity_history",
     }
   );
 
-  paginate(Commodity);
+  paginate(CommodityHistory);
 
-  return Commodity;
+  return CommodityHistory;
 };

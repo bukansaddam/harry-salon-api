@@ -51,6 +51,10 @@ module.exports = {
         type: Sequelize.STRING(10),
         allowNull: false,
       },
+      deviceToken: {
+        type: Sequelize.STRING(),
+        allowNull: true,
+      },
       isDeleted: {
         type: Sequelize.BOOLEAN,
         allowNull: false,

@@ -36,6 +36,10 @@ module.exports = {
         defaultValue:
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnfAxGV-fZxGL9elM_hQ2tp7skLeSwMyUiwo4lMm1zyA&s",
       },
+      deviceToken: {
+        type: Sequelize.STRING(),
+        allowNull: true,
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,

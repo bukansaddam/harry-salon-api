@@ -12,6 +12,7 @@ const { Op } = require("sequelize");
 const { getIdUser } = require("../Utils/helper");
 const { format, addDays } = require("date-fns");
 const moment = require("moment-timezone");
+const { da } = require("date-fns/locale");
 
 async function createOrderHistory(req, res) {
   const { orderId } = req.body;
@@ -149,7 +150,10 @@ async function getOrderHistoryByStore(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
 
-    const today = moment(Date.now()).tz("Asia/Jakarta").add(7, "hours").format();
+    const today = moment(Date.now())
+      .tz("Asia/Jakarta")
+      .add(7, "hours")
+      .format();
     const weekAgo = addDays(new Date(today), -7);
 
     const userId = await getIdUser(req);
@@ -285,6 +289,7 @@ async function getOrderHistoryByStore(req, res) {
           id: item.id,
           orderId: item.orderId,
           storeId: item.order.storeId,
+          handledBy: item.order.employeeId,
           serviceName: item.order.service.name,
           servicePrice: item.order.service.price,
           orderDate: item.order.date,
@@ -528,6 +533,42 @@ async function getOrderHistoryByEmployee(req, res) {
   }
 }
 
+async function getTotalOrderByEmployee(req, res) {
+  const { employeeId } = req.params;
+
+  try {
+    const thirtydaysago = addDays(new Date(), -30);
+
+    if (!employeeId){
+      return res.status(400).json({
+        success: false,
+        message: "employeeId is required",
+      })
+    }
+
+    const totalHistory = await orderHistory.count({
+      include: {
+        model: order,
+        as: "order",
+        where: { employeeId, date: { [Op.gte]: thirtydaysago } },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get total order history successfully",
+      result: totalHistory,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+}
+
+
 async function deleteOrderHistory(req, res) {
   const { id } = req.params;
   try {
@@ -557,5 +598,6 @@ module.exports = {
   getOrderHistoryByStore,
   getOrderHistoryByUser,
   getOrderHistoryByEmployee,
+  getTotalOrderByEmployee,
   deleteOrderHistory,
 };

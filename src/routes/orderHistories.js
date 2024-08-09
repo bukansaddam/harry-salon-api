@@ -42,6 +42,13 @@ router.get(
   checkBlacklist,
   orderHistoryController.getOrderHistoryByUser
 );
+router.get(
+  "/employee/total/:employeeId",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  orderHistoryController.getTotalOrderByEmployee
+);
 router.delete(
   "/:id",
   authenticateToken,

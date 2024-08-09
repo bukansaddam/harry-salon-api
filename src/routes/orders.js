@@ -29,6 +29,7 @@ router.get(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
+  orderController.checkPaymentStatus,
   orderController.getOrder
 );
 router.get(
@@ -36,7 +37,6 @@ router.get(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  orderController.checkPaymentStatus,
   orderController.updateOrderStatusToDelay,
   orderController.getOrderEmployee
 );
@@ -45,7 +45,6 @@ router.get(
   authenticateToken,
   authenticateRefreshToken,
   checkBlacklist,
-  orderController.checkPaymentStatus,
   orderController.updateOrderStatusToDelay,
   orderController.getOrderById
 );

@@ -57,6 +57,13 @@ router.put(
   upload.single("avatar"),
   employeeController.updateEmployee
 );
+router.put(
+  "/:id",
+  authenticateToken,
+  authenticateRefreshToken,
+  checkBlacklist,
+  employeeController.changeStore
+);
 router.delete(
   "/:id",
   authenticateToken,
